@@ -17,7 +17,6 @@ const database = require('./database/database');
 const client = new Client(config.db);
 
 /** 
- * smol update
  * @notes For the database builder to work. It's assumed that you 
  * have an already created database under the name of vain. If you 
  * want the database to be created elsewhere, change the config 
