@@ -1,0 +1,66 @@
+[
+    {
+        "id": "a",
+        "desc": "adventure"
+    },
+    {
+        "id": "c",
+        "desc": "criminal"
+    },
+    {
+        "id": "cy",
+        "desc": "celebrity"
+    },
+    {
+        "id": "d",
+        "desc": "domestic"
+    },
+    {
+        "id": "g",
+        "desc": "great-man"
+    },
+    {
+        "id": "h",
+        "desc": "historical"
+    },
+    {
+        "id": "l",
+        "desc": "literary-memoir"
+    },
+    {
+        "id": "m",
+        "desc": "military"
+    },
+    {
+        "id": "mc",
+        "desc": "middle-class"
+    },
+    {
+        "id": "p",
+        "desc": "politics"
+    },
+    {
+        "id": "r",
+        "desc": "religious"
+    },
+    {
+        "id": "s",
+        "desc": "satire"
+    },
+    {
+        "id": "sc",
+        "desc": "social-critique"
+    },
+    {
+        "id": "sd",
+        "desc": "school-days"
+    },
+    {
+        "id": "t",
+        "desc": "travel"
+    },
+    {
+        "id": "th",
+        "desc": "theatre"
+    }
+]

@@ -10,6 +10,7 @@
  */
 
 const chalk = require('chalk');
+const fs = require('fs');
 
 /**
  * @description execute, is a general purpose function to create database
@@ -20,6 +21,7 @@ const chalk = require('chalk');
  * @example Query: 'SELECT * FROM user WHERE id = $1'
  * @example params: [1]
  * 
+ * @param {A PG client} client
  * @param {String: SQL query} query 
  * @param {Array: String parameters} params 
  * 
@@ -31,14 +33,20 @@ const execute = async (client, query, params = []) => {
         if (res) {
             const querySplit = query.split(' ');
             if (querySplit[0] === 'DROP') {
-                console.log("TABLE " + chalk.blue(`${querySplit[4]}`) + " HAS BEEN " + chalk.redBright("DROPPED"));
-            } else {
-                console.log("TABLE " + chalk.blue(`${querySplit[2]}`) + " HAS BEEN " + chalk.green("CREATED"));
+                console.log(chalk.redBright("DROPPED") + " TABLE " + chalk.blue(`${querySplit[4]}`));
+            } 
+            else if (querySplit[0] === 'CREATE') {
+                console.log(chalk.green("CREATED") + " TABLE " + chalk.blue(`${querySplit[2]}`));
+            }
+            else if (querySplit[0] === 'INSERT') {
+                console.log(chalk.green("INSERTED ") + chalk.yellow(`${params[0]} and ${params[1]}`) + 
+                " INTO TABLE " + chalk.blue(`${querySplit[2]}`));
             }
         }
         return res;
     } catch (err) {
-        console.error(err);
+        console.log("There's been an error!")
+        console.log( chalk.red(query) + " did not run!")
     }
 };
 
@@ -49,26 +57,27 @@ const execute = async (client, query, params = []) => {
  * in async, without Promise.all DROP's might try to happen after
  * CREATES. Resulting in problems.
  * 
- * @param None
+ * @param {A pg Client} Client
  * @returns None
  */
 const deleteTables = async (client) => {
     return Promise.all([
-        execute(client, `DROP TABLE IF EXISTS book`),
-        execute(client, `DROP TABLE IF EXISTS namedPerson`),
-        execute(client, `DROP TABLE IF EXISTS type`),
-        execute(client, `DROP TABLE IF EXISTS subject`),
-        execute(client, `DROP TABLE IF EXISTS title`),
-        execute(client, `DROP TABLE IF EXISTS format`),
-        execute(client, `DROP TABLE IF EXISTS author`),
-        execute(client, `DROP TABLE IF EXISTS editor`),
-        execute(client, `DROP TABLE IF EXISTS translator`),
-        execute(client, `DROP TABLE IF EXISTS edition`),
-        execute(client, `DROP TABLE IF EXISTS bookType`),
-        execute(client, `DROP TABLE IF EXISTS bookSubject`),
-        execute(client, `DROP TABLE IF EXISTS publisher`),
-        execute(client, `DROP TABLE IF EXISTS agreement`),
-        execute(client, `DROP TABLE IF EXISTS bookEdition`),
+        console.log("=================================================================="),
+        execute(client, `DROP TABLE IF EXISTS book CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS namedPerson CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS type CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS subject CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS title CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS format CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS author CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS editor CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS translator CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS edition CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS bookType CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS bookSubject CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS publisher CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS agreement CASCADE`),
+        execute(client, `DROP TABLE IF EXISTS bookEdition CASCADE`),
     ]);
 };
 
@@ -83,11 +92,12 @@ const deleteTables = async (client) => {
  * @note For quick edit, CTRL + F "Creation of ${table name}" will instantly
  * direct you to the CREATE statement.
  * 
- * @param None
+ * @param {A PG client} Client
  * @returns None
  */
 const createDatabases = async (client) => {
     return Promise.all([
+        console.log("=================================================================="),
         //Creation of book
         execute(client, `CREATE TABLE book (
             bookID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
@@ -106,7 +116,7 @@ const createDatabases = async (client) => {
         //Creation of type
         execute(client, `CREATE TABLE type (
             typeID VARCHAR(50) PRIMARY KEY,
-            editionString VARCHAR(250) NOT NULL
+            typeDescription VARCHAR(250) NOT NULL
         )`),
         //Creation of subject
         execute(client, `CREATE TABLE subject (
@@ -125,18 +135,18 @@ const createDatabases = async (client) => {
         )`),
         //Creation of author
         execute(client, `CREATE TABLE author (
-            namedPersonID INT NOT NULL,
-            bookID INT NOT NULL
+            namedPersonID INT NOT NULL REFERENCES namedPerson(namedPersonID),
+            bookID INT NOT NULL REFERENCES book(bookID)
         )`),
         //Creation of editor
         execute(client, `CREATE TABLE editor (
-            namedPersonID INT NOT NULL,
-            bookID INT NOT NULL
+            namedPersonID INT NOT NULL REFERENCES namedPerson(namedPersonID),
+            bookID INT NOT NULL REFERENCES book(bookID)
         )`),
         //Creation of translator
         execute(client, `CREATE TABLE translator (
-            namedPersonID INT NOT NULL,
-            bookID INT NOT NULL
+            namedPersonID INT NOT NULL REFERENCES namedPerson(namedPersonID),
+            bookID INT NOT NULL REFERENCES book(bookID)
         )`),
         //Creation of edition
         execute(client, `CREATE TABLE edition (
@@ -145,13 +155,13 @@ const createDatabases = async (client) => {
         )`),
         //Creation of bookType
         execute(client, `CREATE TABLE bookType (
-            bookID INT NOT NULL, 
-            typeID VARCHAR(50)
+            bookID INT NOT NULL REFERENCES namedPerson(namedPersonID), 
+            typeID VARCHAR(50) REFERENCES type(typeID)
         )`),
         //Creation of bookSbuject
         execute(client, `CREATE TABLE bookSubject (
-            bookID INT NOT NULL, 
-            subjectID VARCHAR(50)
+            bookID INT NOT NULL REFERENCES book(bookID),
+            subjectID VARCHAR(50) REFERENCES subject(subjectID)
         )`),
         //Creation of publisher
         execute(client, `CREATE TABLE publisher (
@@ -168,26 +178,54 @@ const createDatabases = async (client) => {
         )`),
         //Creation of bookEdition
         execute(client, `CREATE TABLE bookEdition (
-            bookID INT,
-            editionID INT,
-            publisherID INT,
-            titleID INT,
-            formatID INT,
+            bookID INT REFERENCES book(bookID),
+            editionID INT REFERENCES edition(editionID),
+            publisherID INT REFERENCES publisher(publisherID),
+            titleID INT REFERENCES title(titleID),
+            formatID INT REFERENCES format(formatID),
             year VARCHAR(250),
             yearNote VARCHAR(250),
             numberPages INT,
             numberVolumes VARCHAR(250),
-            agreementTypeID INT, 
+            agreementTypeID INT REFERENCES agreement(agreementTypeID),
             salePrice INT,
-            paymentAgreedAmount INT, 
-            illustrations VARCHAR(250), 
+            paymentAgreedAmount INT,
+            illustrations VARCHAR(250),
             illustrationsPayment INT,
             copiesSold INT,
             copiesRemaining INT,
             profitLoss INT,
-            proceedsAuthor VARCHAR(250)
+            proceedsAuthor VARCHAR(250),
+            formatNote VARCHAR(250)
         )`),
     ]);
 };
 
-module.exports = { execute, deleteTables, createDatabases };
+/**
+ * @description populateDatabase, fills the database with the pre existing values 
+ * like types and subjects, which are stored in json files.
+ * 
+ * @notes tempted to use this function to write the entire database.
+ * 
+ * @param {PG Client} client 
+ */
+const populateDatabase = async (client) => {
+    let rawDataType = fs.readFileSync("database/json_files/types.json");
+    let rawDataSubject = fs.readFileSync("database/json_files/subjects.json");
+    let types = JSON.parse(rawDataType);
+    let subjects = JSON.parse(rawDataSubject);
+    console.log("==================================================================");
+    for (let index in types){
+        const query = "INSERT INTO type (typeID, typeDescription) VALUES ($1, $2)";
+        const params = [types[index].id, types[index].desc];
+        await execute(client, query, params);
+    }
+    console.log("==================================================================");
+    for (let index in subjects){
+        const query = "INSERT INTO subject (subjectID, subjectDescription) VALUES ($1, $2)";
+        const params = [subjects[index].id, subjects[index].desc];
+        await execute(client, query, params);
+    }
+}
+
+module.exports = { execute, deleteTables, createDatabases, populateDatabase };

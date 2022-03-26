@@ -1,0 +1,34 @@
+[
+    {
+        "id": "a",
+        "desc": "autobiography"
+    },
+    {
+        "id": "b",
+        "desc": "biography"
+    },
+    {
+        "id": "c",
+        "desc": "compilation"
+    },
+    {
+        "id": "d",
+        "desc": "diary-journal"
+    },
+    {
+        "id": "f",
+        "desc": "fictional"
+    },
+    {
+        "id": "l",
+        "desc": "letters-correspondence"
+    },
+    {
+        "id": "m",
+        "desc": "memoir"
+    },
+    {
+        "id": "o",
+        "desc": "other"
+    }
+]
