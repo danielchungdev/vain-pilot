@@ -244,7 +244,33 @@ class Database{
             const bookParams = [books[index].descriptor, books[index].note];
             let bookRes = await this.execute(bookQuery, bookParams);
             bookRes = bookRes[0].bookid;
+            const namedPersonQuery = `INSERT INTO namedPerson
+                                        (fname, lname, nobilitytitle, lifeYears, personNote) 
+                                    VALUES 
+                                        ($1, $2, $3, $4, $5) 
+                                    RETURNING namedpersonid`;
             
+            let firstName = "";
+            let lastName = "";
+            let nobilityTitle = "";
+            if (books[index].author.split(',').length === 1){
+                firstName = books[index].author.split(',')[0];
+            }
+            if (books[index].author.split(',').length === 2){
+                firstName = books[index].author.split(',')[1];
+                lastName = books[index].author.split(',')[0];
+            }
+            if (books[index].author.split(',').length === 3){
+                firstName = books[index].author.split(',')[1];
+                lastName = books[index].author.split(',')[0];
+                let firstArr = books[index].author.split(',')[2]
+                firstArr = firstArr.split(':');
+                nobilityTitle = firstArr[0]
+            }
+            const namedPersonParam = [firstName, lastName, nobilityTitle, "", ""]
+            let namedPersonRes = await this.execute(namedPersonQuery, namedPersonParam);
+
+            namedPersonRes = namedPersonRes[0].namedpersonid;
         };
     }
 
