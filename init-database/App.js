@@ -11,10 +11,12 @@
       |_|   |_|  |__/     
  */
 
-const { Client } = require('pg');
 const inquirer = require('inquirer');
+const process = require('process');
+const { Client } = require('pg');
 const { config } = require('./database/config.js');
-const database = require('./database/database');        
+const database = require('./database/database'); 
+const chalk = require('chalk');       
 const client = new Client(config.db);
 
 const fs = require('fs');
@@ -31,15 +33,17 @@ const Book = require("./database/classes/Book");
 const App = async () => {
     await client.connect();
     const pgdb = new database.Database(client);
+    console.log( chalk.green("Welcome to VAIN database manager"));
     const action = await inquirer.prompt({
         name: "userAction",
         type: "list",
-        message: "What would you like to do: \n",
+        message: "What would you like to do:",
         choices: [
             "Drop Database.",
             "Create Database.",
             "Recreate Database.",
-            "Read a file."
+            "Read a file.",
+            "Quit"
         ]
     });
     if (action.userAction === "Drop Database."){
@@ -61,6 +65,9 @@ const App = async () => {
         console.log('running reading file')
         await pgdb.readFile('vain.tsv')
         await pgdb.insertIntoDatabase('vain.json')
+    }
+    if (action.userAction === "Quit."){
+        process.exit(0)
     }
     await pgdb.closeDatabase();
 
