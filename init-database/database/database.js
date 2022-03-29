@@ -47,6 +47,7 @@ class Database{
                 if (querySplit[0] === 'INSERT') {
                     console.log(chalk.green("INSERTED ") + chalk.yellow(`${params[0]} and ${params[1]}`) + 
                     " INTO TABLE " + chalk.blue(`${querySplit[2]}`));
+                    return res.rows;
                 }
                 if (querySplit[0] === 'SELECT'){
                     return res.rows;
@@ -55,6 +56,7 @@ class Database{
         } catch (err) {
             console.log("There's been an error!")
             console.log( chalk.red(query) + " did not run!")
+            console.log(err);
         }
     };
 
@@ -65,7 +67,6 @@ class Database{
      * in async, without Promise.all DROP's might try to happen after
      * CREATES. Resulting in problems.
      * 
-     * @param {A pg Client} Client
      * @returns None
      */
     deleteTables = async () => {
@@ -108,8 +109,8 @@ class Database{
             //Creation of book
             this.execute(`CREATE TABLE book (
                 bookID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-                bookDescriptor VARCHAR(250),
-                bookNote VARCHAR(250)
+                bookDescriptor VARCHAR(10000),
+                bookNote VARCHAR(500)
             )`),
             //Creation of namedPerson
             this.execute(`CREATE TABLE namedPerson (
@@ -234,26 +235,52 @@ class Database{
         }
     }
 
-    readFile = async (filename) => {
+    insertIntoDatabase = async (filename) => {
+        let rawBooksFile = fs.readFileSync(`data/output/${filename}`);
+        let books = JSON.parse(rawBooksFile);
+        console.log(books);
+        for (let index in books){
+            const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
+            const bookParams = [books[index].descriptor, books[index].note];
+            let bookRes = await this.execute(bookQuery, bookParams);
+            bookRes = bookRes[0].bookid;
+            
+        };
+    }
+
+    /**
+     * @description readFile, takes the input file and parses it into a json. Files 
+     * should be able to be found in the data/input folder and output json files 
+     * will automatically be stored in data/output/filename.json
+     * 
+     * @param filename: The name of the path we want to read.
+     */
+    readFile = (filename) => {
         try{
-            const data = fs.readFileSync(filename, "UTF-8");
-            const lines = data.split(/\r?\n/);
-            lines.forEach( (line) => {
-                line = line.split('\t');
-                let book = new Book(line[0], line[1], line[2], line[3], 
-                    line[4],line[5],line[6],line[7],line[8],line[9],
-                    line[10],line[11]);
-                const bookid = this.execute(
-                    `INSERT INTO book(bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid`, 
-                    [book.descriptor, book.notes]
-                );
-                console.log(bookid);
+            let count = 0;
+            const books = []
+            const file = fs.readFileSync(`data/input/${filename}`, {encoding: 'utf-8', flag: 'r'});
+            const lines = file.split(/\r?\n/);
+            lines.forEach( async (line) => {
+                if (count > 0){
+                    line = line.split('\t');
+                    let book = new Book(line[0], line[1], line[2], line[3], 
+                        line[4],line[5],line[6],line[7],line[8],line[9],
+                        line[10],line[11]);
+                    books.push(book);
+                }
+                count += 1;
             });
-            console.log(books);
+            fs.writeFileSync(`data/output/${filename.split('.')[0]}.json`,JSON.stringify(books));
         }
         catch (err){
             console.error(err);
         }
+    }
+
+    closeDatabase = async() => {
+        console.log("Closed")
+        this.client.end();
     }
 }
 
