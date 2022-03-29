@@ -249,7 +249,6 @@ class Database{
                                     VALUES 
                                         ($1, $2, $3, $4, $5) 
                                     RETURNING namedpersonid`;
-            
             let firstName = "";
             let lastName = "";
             let nobilityTitle = "";
@@ -305,7 +304,6 @@ class Database{
     }
 
     closeDatabase = async() => {
-        console.log("Closed")
         this.client.end();
     }
 }

@@ -31,42 +31,39 @@ const Book = require("./database/classes/Book");
 const App = async () => {
     await client.connect();
     const pgdb = new database.Database(client);
-    await pgdb.deleteTables();
-    await pgdb.createDatabases();
-    await pgdb.populateDatabase();
-    await pgdb.readFile('vain.tsv');
-    await pgdb.insertIntoDatabase('vain.json')
+    const action = await inquirer.prompt({
+        name: "userAction",
+        type: "list",
+        message: "What would you like to do: \n",
+        choices: [
+            "Drop Database.",
+            "Create Database.",
+            "Recreate Database.",
+            "Read a file."
+        ]
+    });
+    if (action.userAction === "Drop Database."){
+        await pgdb.deleteTables();
+        console.log("\nAll tables dropped!")
+    }
+    if (action.userAction === "Create Database."){
+        await pgdb.createDatabases();
+        await pgdb.populateDatabase();
+        console.log("\nDatabase Created!")
+    }
+    if (action.userAction === "Recreate Database."){
+        await pgdb.deleteTables();
+        await pgdb.createDatabases();
+        await pgdb.populateDatabase();
+        console.log("\nDatabase dropped and recreated!")
+    }
+    if (action.userAction === "Read a file."){
+        console.log('running reading file')
+        await pgdb.readFile('vain.tsv')
+        await pgdb.insertIntoDatabase('vain.json')
+    }
     await pgdb.closeDatabase();
-    // const action = await inquirer.prompt({
-    //     name: "userAction",
-    //     type: "list",
-    //     message: "What would you like to do: \n",
-    //     choices: [
-    //         "Drop Database.",
-    //         "Create Database.",
-    //         "Recreate Database.",
-    //         "Read a file."
-    //     ]
-    // });
-    // if (action.userAction === "Drop Database."){
-    //     await pgdb.deleteTables();
-    //     console.log("\nAll tables dropped!")
-    // }
-    // if (action.userAction === "Create Database."){
-    //     await pgdb.createDatabases();
-    //     await pgdb.populateDatabase();
-    //     console.log("\nDatabase Created!")
-    // }
-    // if (action.userAction === "Recreate Database."){
-    //     await pgdb.deleteTables();
-    //     await pgdb.createDatabases();
-    //     await pgdb.populateDatabase();
-    //     console.log("\nDatabase dropped and recreated!")
-    // }
-    // if (action.userAction === "Read a file."){
-    //     console.log('running reading file')
-    //     await pgdb.readFile('data/input/vain.tsv')
-    // }
+
 };
 
 App();
