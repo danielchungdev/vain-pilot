@@ -134,7 +134,7 @@ class Database{
             //Creation of title
             this.execute(`CREATE TABLE title (
                 titleID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                titleString VARCHAR(250) NOT NULL
+                titleString VARCHAR(100000) NOT NULL
             )`),
             //Creation of format
             this.execute(`CREATE TABLE format (
@@ -235,42 +235,89 @@ class Database{
         }
     }
 
+    insertIfNamedPersonExist = async (namedPerson) => {
+        //lastname, firstname, title, year
+        let person = namedPerson.split(",");
+        try{
+            //Check for existing
+            let selectQuery = `SELECT * from namedPerson WHERE fname = $1 AND lname = $2`;
+            let selectParams = [person[1], person[0]];
+            let res = await this.execute(selectQuery);
+            if ( res.length > 0){
+                return res[0].namedpersonid
+            }
+            if (person.length === 3){
+                //with nobility
+                let insertQuery = `INSERT INTO namedperson 
+                                        (fname, lname, nobilitytitle)     
+                                    VALUES ($1, $2, $3) RETURNING namedperonid`;
+                let insertParam = [person[1], person[0], person[2]];
+                let resInsert = await this.execute(insertQuery, insertParam);
+                return resInsert[0].namedpersonid;
+            }   
+            else if (person.length === 4){
+                //nobility + year
+                let insertQuery = `INSERT INTO namedperson
+                                    (fname, lname, nobilitytitle, lifeyears) 
+                                VALUES 
+                                    ($1, $2, $3, $4) RETURNING namedpersonid`;
+                let insertParam = [person[1], person[0], person[2], person[3]];
+                let resInsert = await this.execute(insertQuery, insertParam); 
+                return resInsert[0].namedpersonid;
+            }
+            else{
+                //no nobility 
+                let insertQuery = `INSERT INTO namedperson(fname, lname) VALUES ($1, $2) RETURNING namedpersonid`;
+                let resInsert = await this.execute(insertQuery, selectParams);
+                return resInsert[0].namedpersonid;
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
+    };
+
+    insertIfPublisherExist = async (publisher) => {
+        //publishername, publisherlocation
+        let publisher = publisher.split(":");
+        try{
+            //Check for existing
+            let selectQuery = `SELECT * from publisher WHERE publisherlocation = $1 publishername = $2`;
+            let selectParams = [person[0], person[1]];
+            let res = await this.execute(selectQuery, selectParams);
+            if ( res.length > 0){
+                return res[0].publisherid;
+            }
+            else {
+                let insertQuery = `INSERT INTO publisher(publisherlocation, publishername)  VALUES ($1, $2)`;
+                let res = await this.execute(insertQuery, selectParams);
+                return res[0].publisherid;
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
+    };
+
     insertIntoDatabase = async (filename) => {
         let rawBooksFile = fs.readFileSync(`data/output/${filename}`);
         let books = JSON.parse(rawBooksFile);
         console.log(books);
         for (let index in books){
             const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
-            const bookParams = [books[index].descriptor, books[index].note];
-            let bookRes = await this.execute(bookQuery, bookParams);
-            bookRes = bookRes[0].bookid;
-            const namedPersonQuery = `INSERT INTO namedPerson
-                                        (fname, lname, nobilitytitle, lifeYears, personNote) 
-                                    VALUES 
-                                        ($1, $2, $3, $4, $5) 
-                                    RETURNING namedpersonid`;
-            let firstName = "";
-            let lastName = "";
-            let nobilityTitle = "";
-            if (books[index].author.split(',').length === 1){
-                firstName = books[index].author.split(',')[0];
-            }
-            if (books[index].author.split(',').length === 2){
-                firstName = books[index].author.split(',')[1];
-                lastName = books[index].author.split(',')[0];
-            }
-            if (books[index].author.split(',').length === 3){
-                firstName = books[index].author.split(',')[1];
-                lastName = books[index].author.split(',')[0];
-                let firstArr = books[index].author.split(',')[2]
-                firstArr = firstArr.split(':');
-                nobilityTitle = firstArr[0]
-            }
-            const namedPersonParam = [firstName, lastName, nobilityTitle, "", ""]
-            let namedPersonRes = await this.execute(namedPersonQuery, namedPersonParam);
-
-            namedPersonRes = namedPersonRes[0].namedpersonid;
-        };
+            let bookRes = await this.execute(bookQuery, [books[index].descriptor, books[index].note]);
+            let bookid = bookRes[0].bookid;
+            let type = books[index].type.toLowerCase();
+            let subject = books[index].subject.toLowerCase();
+            let authorsList = books[index].author.split(" and ");
+            let title = books[index].title;
+            let titleQuery = `INSERT INTO title (titlestring) VALUES ($1) RETURNING titleid`;
+            let titleRes = await this.execute(titleQuery, [title]);
+            let titleid = titleRes[0].titleid;
+            let namedPersonID = await this.insertIfNamedPersonExist(authorsList[0]);
+            let publisherID = await this.insertIfPublisherExist(books[index].publisher);
+            
+        }
     }
 
     /**
