@@ -316,7 +316,6 @@ class Database{
             let titleid = titleRes[0].titleid;
             let namedPersonID = await this.insertIfNamedPersonExist(authorsList[0]);
             let publisherID = await this.insertIfPublisherExist(books[index].publisher);
-            
         }
     }
 
