@@ -62,5 +62,9 @@
     {
         "id": "th",
         "desc": "theatre"
+    },
+    {
+        "id": "unk",
+        "desc": "unknown"
     }
 ]
