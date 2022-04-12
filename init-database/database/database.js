@@ -14,8 +14,9 @@ const fs = require('fs');
 const Book = require("./classes/Book");
 
 class Database{
-    constructor(client){
+    constructor(client, mode){
         this.client = client;
+        this.mode = mode;
     }
 
     /**
@@ -23,6 +24,8 @@ class Database{
      * calls from postgres. It should be able to take any command. It's also 
      * an async function because of the necesity that everything must run line
      * by line. Query if requires arguments is expected to be a prepared statement. 
+     * 
+     * @Tips Uncomment console logs to get details of what's being updated.
      * 
      * @example Query: 'SELECT * FROM user WHERE id = $1'
      * @example params: [1]
@@ -36,17 +39,26 @@ class Database{
     execute = async ( query, params = []) => {
         try {
             const res = await this.client.query(query, params);
+            let count = 0;
             if (res) {
                 const querySplit = query.split(' ');
                 if (querySplit[0] === 'DROP') {
-                    console.log(chalk.redBright("DROPPED") + " TABLE " + chalk.blue(`${querySplit[4]}`));
+                    if (this.mode === 1){
+                        console.log(chalk.redBright("DROPPED") + " TABLE " + chalk.blue(`${querySplit[4]}`));
+                    }
+                    count += 1;
                 } 
                 if (querySplit[0] === 'CREATE') {
-                    console.log(chalk.green("CREATED") + " TABLE " + chalk.blue(`${querySplit[2]}`));
+                    if (this.mode === 1){
+                        console.log(chalk.green("CREATED") + " TABLE " + chalk.blue(`${querySplit[2]}`));
+                    }
+                    count += 1
                 }
                 if (querySplit[0] === 'INSERT') {
-                    console.log(chalk.green("INSERTED ") + chalk.yellow(`${params[0]} and ${params[1]}`) + 
-                    " INTO TABLE " + chalk.blue(`${querySplit[2]}`));
+                    if (this.mode === 1){
+                        console.log(chalk.green("INSERTED ") + chalk.yellow(`${params[0]} and ${params[1]}`) + 
+                        " INTO TABLE " + chalk.blue(`${querySplit[2]}`));
+                    }
                     return res.rows;
                 }
                 if (querySplit[0] === 'SELECT'){
@@ -71,7 +83,6 @@ class Database{
      */
     deleteTables = async () => {
         return Promise.all([
-            console.log("=================================================================="),
             this.execute(`DROP TABLE IF EXISTS book CASCADE`),
             this.execute(`DROP TABLE IF EXISTS namedPerson CASCADE`),
             this.execute(`DROP TABLE IF EXISTS type CASCADE`),
@@ -105,7 +116,6 @@ class Database{
      */
     createDatabases = async () => {
         return Promise.all([
-            console.log("=================================================================="),
             //Creation of book
             this.execute(`CREATE TABLE book (
                 bookID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
@@ -224,29 +234,29 @@ class Database{
         let subjects = JSON.parse(rawDataSubject);
         let editions = JSON.parse(rawDataEdition);
         const tempParam = ["temporary"];
-        console.log("==================================================================");
+
         const tempPublisher = "INSERT INTO publisher(publishername) VALUES ($1)"
         const publisherParam = ["No publisher"];
         await this.execute(tempPublisher, publisherParam)
-        console.log("==================================================================");
+
         const tempFormat = "INSERT INTO format(formatname) VALUES ($1)";
         await this.execute(tempFormat, tempParam);
-        console.log("==================================================================");
+
         const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)"
         await this.execute(tempAgreement, tempParam);
-        console.log("==================================================================");
+
         for (let index in editions){
             const query = "INSERT INTO edition (editionstring) VALUES ($1)";
             const params = [editions[index].edition];
             await this.execute(query, params);
         }
-        console.log("==================================================================");
+
         for (let index in types){
             const query = "INSERT INTO type (typeID, typeDescription) VALUES ($1, $2)";
             const params = [types[index].id, types[index].desc];
             await this.execute(query, params);
         }
-        console.log("==================================================================");
+
         for (let index in subjects){
             const query = "INSERT INTO subject (subjectID, subjectDescription) VALUES ($1, $2)";
             const params = [subjects[index].id, subjects[index].desc];
@@ -312,7 +322,6 @@ class Database{
         try{
             //Check for existing
             publisher = publisher.split(":");
-            console.log(publisher);
             let selectQuery = `SELECT * from publisher WHERE publisherlocation = $1 AND publishername = $2`;
             let selectParams = [publisher[0], publisher[1]];
             let res = await this.execute(selectQuery, selectParams);
@@ -333,18 +342,22 @@ class Database{
     insertIntoDatabase = async (filename) => {
         let rawBooksFile = fs.readFileSync(`data/output/${filename}`);
         let books = JSON.parse(rawBooksFile);
-        console.log(books);
         for (let index in books){
             const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
             let bookRes = await this.execute(bookQuery, [books[index].descriptor, books[index].note]);
             let bookid = bookRes[0].bookid;
             let type = "unk";
-            let subject = "unk";
+            let subject = ["unk"];
             if (books[index].type !== ""){
-                type = books[index].type.toLowerCase();
+                if (books[index].type === "unknown"){
+                    type= "unk"
+                }
+                else{
+                    type = books[index].type.toLowerCase();
+                }
             }
             if (books[index].subject !== ""){
-                subject = books[index].subject.toLowerCase();
+                subject = books[index].subject.split(",");
             }
             let authorsList = books[index].author.split(" and ");
             let title = books[index].title;
@@ -353,21 +366,22 @@ class Database{
             let titleid = titleRes[0].titleid;
             let publisherid = 1
             if (books[index].publisher !== ""){
-                console.log(books[index].publisher);
                 publisherid = await this.insertIfPublisherExist(books[index].publisher);
-                console.log(publisherid);
             }
             for (let i = 0; i < authorsList; i++){
                 let namedPersonID = await this.insertIfNamedPersonExist(authorsList[0]);
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }
-            console.log(subject);
-            console.log(type);
-            const booksubjectQuery = "INSERT INTO booksubject (bookid, subjectid) VALUES ($1, $2)";
-            const booksubjectParams = [bookid, subject];
-            await this.execute(booksubjectQuery, booksubjectParams);
-
+            for (let i = 0; i < subject.length; i++){
+                let sub = subject[i].trim().toLowerCase()
+                if (sub === "?" || sub === "unknown" || sub === "????"){
+                    sub = "unk"
+                }
+                const booksubjectQuery = "INSERT INTO booksubject (bookid, subjectid) VALUES ($1, $2)";
+                const booksubjectParams = [bookid, sub];
+                await this.execute(booksubjectQuery, booksubjectParams);
+            }
             const booktypeQuery = "INSERT INTO booktype (bookid, typeid) VALUES ($1, $2)";
             const booktypeParams = [bookid, type];
             await this.execute(booktypeQuery, booktypeParams);

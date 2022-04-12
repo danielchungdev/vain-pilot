@@ -20,6 +20,10 @@
         "desc": "fictional"
     },
     {
+        "id": "g",
+        "desc": "Gallows broadside"
+    },
+    {
         "id": "l",
         "desc": "letters-correspondence"
     },
