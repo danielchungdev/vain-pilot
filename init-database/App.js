@@ -38,6 +38,31 @@ const chooseMode = async () => {
     } 
 }
 
+const deleteTables = async (pgdb) => {
+    const spinDelete = spinner.createSpinner("Deleting tables\n").start();
+    await pgdb.deleteTables();
+    spinDelete.success({text: "Deleted tables!"})
+}
+
+const createTables = async (pgdb) => {
+    const spinCreate = spinner.createSpinner("Creating tables").start();
+    await pgdb.createDatabases();
+    spinCreate.success({text: "Created tables!"});
+}
+
+const populateDatabase = async (pgdb) => {
+    const spinPopulate = spinner.createSpinner("Populating with constants").start();
+    await pgdb.populateDatabase();
+    spinPopulate.success({text: "Populated Tables"})
+}
+
+const insertFiletoDatabase = async (pgdb) => {
+    const spin = spinner.createSpinner('Inserting TSV data').start();
+    await pgdb.readFile('vain.tsv')
+    await pgdb.insertIntoDatabase('vain.json')
+    spin.success({ text: 'DB installation complete!'});
+}
+
 /**
  * @notes For the database builder to work. It's assumed that you 
  * have an already created database under the name of vain. If you 
@@ -65,50 +90,28 @@ const App = async () => {
     });
     if (action.userAction === "Do everything"){
         pgdb = await chooseMode();
-        const spinDelete = spinner.createSpinner("Deleting tables").start();
-        await pgdb.deleteTables();
-        spinDelete.success({text: "Deleted tables!"})
-        const spinCreate = spinner.createSpinner("Creating tables").start();
-        await pgdb.createDatabases();
-        spinCreate.success({text: "Created tables!"});
-        const spinPopulate = spinner.createSpinner("Populating with constants").start();
-        await pgdb.populateDatabase();
-        spinPopulate.success({text: "Populated Tables"})
-        const spin = spinner.createSpinner('Inserting TSV data').start();
-        await pgdb.readFile('vain.tsv')
-        await pgdb.insertIntoDatabase('vain.json')
-        spin.success({ text: 'DB installation complete!'});
+        await deleteTables(pgdb);
+        await createTables(pgdb);
+        await populateDatabase(pgdb);
+        await insertFiletoDatabase(pgdb);
     }
     if (action.userAction === "Drop Database"){
         pgdb = await chooseMode();
-        const spinDelete = spinner.createSpinner("Deleting tables").start();
-        await pgdb.deleteTables();
-        spinDelete.success({text: "Deleted tables!"})
+        await deleteTables(pgdb);
     }
     if (action.userAction === "Create Database"){
         pgdb = await chooseMode();
-        const spinCreate = spinner.createSpinner("Creating tables").start();
-        await pgdb.createDatabases();
-        spinCreate.success({text: "Created tables!"});
+        await createTables(pgdb);
     }
     if (action.userAction === "Recreate Database"){
         pgdb = await chooseMode();
-        const spinDelete = spinner.createSpinner("Deleting tables").start();
-        await pgdb.deleteTables();
-        spinDelete.success({text: "Deleted tables!"})
-        const spinCreate = spinner.createSpinner("Creating tables").start();
-        await pgdb.createDatabases();
-        spinCreate.success({text: "Created tables!"});
-        const spinPopulate = spinner.createSpinner("Populating with constants").start();
-        await pgdb.populateDatabase();
-        spinPopulate.success({text: "Populated Tables"})
+        await deleteTables(pgdb);
+        await createTables(pgdb);
+        await populateDatabase(pgdb);
     }
     if (action.userAction === "Read a file"){
         pgdb = await chooseMode();
-        const spin = spinner.createSpinner('inserting data...').start();
-        await pgdb.readFile('vain.tsv')
-        await pgdb.insertIntoDatabase('vain.json')
-        spin.success({ text: 'Successful!'});
+        await insertFiletoDatabase(pgdb);
     }
     if (action.userAction === "Quit"){
         process.exit(0)
