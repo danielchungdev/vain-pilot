@@ -14,6 +14,11 @@ const fs = require('fs');
 const Book = require("./classes/Book");
 
 class Database{
+    /**
+     * @description Constructor for the database class.
+     * @param {*} client 
+     * @param {*} mode 
+     */
     constructor(client, mode){
         this.client = client;
         this.mode = mode;
@@ -39,20 +44,17 @@ class Database{
     execute = async ( query, params = []) => {
         try {
             const res = await this.client.query(query, params);
-            let count = 0;
             if (res) {
                 const querySplit = query.split(' ');
                 if (querySplit[0] === 'DROP') {
                     if (this.mode === 1){
                         console.log(chalk.redBright("DROPPED") + " TABLE " + chalk.blue(`${querySplit[4]}`));
                     }
-                    count += 1;
                 } 
                 if (querySplit[0] === 'CREATE') {
                     if (this.mode === 1){
                         console.log(chalk.green("CREATED") + " TABLE " + chalk.blue(`${querySplit[2]}`));
                     }
-                    count += 1
                 }
                 if (querySplit[0] === 'INSERT') {
                     if (this.mode === 1){
@@ -66,9 +68,8 @@ class Database{
                 } 
             }
         } catch (err) {
-            console.log("There's been an error!")
-            console.log( chalk.red(query) + " did not run!")
-            console.log(err);
+            console.error( chalk.red(query) + " did not run!")
+            console.error(err);
         }
     };
 
@@ -222,9 +223,7 @@ class Database{
     /**
      * @description populateDatabase, fills the database with the pre existing values 
      * like types and subjects, which are stored in json files.
-     * 
-     * @notes tempted to use this function to write the entire database.
-     * 
+     * @returns None
      */
     populateDatabase = async () => {
         let rawDataType = fs.readFileSync("database/json_files/types.json");
@@ -233,41 +232,47 @@ class Database{
         let types = JSON.parse(rawDataType);
         let subjects = JSON.parse(rawDataSubject);
         let editions = JSON.parse(rawDataEdition);
+        /**
+         * @TODO change these (232-239), these are default values for tables.
+         */
         const tempParam = ["temporary"];
-
         const tempPublisher = "INSERT INTO publisher(publishername) VALUES ($1)"
         const publisherParam = ["No publisher"];
         await this.execute(tempPublisher, publisherParam)
-
         const tempFormat = "INSERT INTO format(formatname) VALUES ($1)";
         await this.execute(tempFormat, tempParam);
-
         const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)"
         await this.execute(tempAgreement, tempParam);
 
-        for (let index in editions){
+        for (let index in editions){ //Reads through all objects from the edition.json file
             const query = "INSERT INTO edition (editionstring) VALUES ($1)";
             const params = [editions[index].edition];
             await this.execute(query, params);
         }
 
-        for (let index in types){
+        for (let index in types){ //Reads through all objects from the types.json file
             const query = "INSERT INTO type (typeID, typeDescription) VALUES ($1, $2)";
             const params = [types[index].id, types[index].desc];
             await this.execute(query, params);
         }
 
-        for (let index in subjects){
+        for (let index in subjects){ //Reads through all objects from the subjects.json file
             const query = "INSERT INTO subject (subjectID, subjectDescription) VALUES ($1, $2)";
             const params = [subjects[index].id, subjects[index].desc];
             await this.execute(query, params);
         }
     }
 
+    /**
+     * @description insertIfNamedPersonExist this function first searches to see if the
+     * named person already exists. If it does then returns such ID. Else it will parse 
+     * the named person information and insert it into the database.
+     * @param {String(lastname, firstname, nobilitytitle, year)} namedPerson
+     * @returns named person's id.
+     */
     insertIfNamedPersonExist = async (namedPerson) => {
-        //lastname, firstname, title, year
         try{
-            //Check for existing
+            //Check for existing named person.
             let person = namedPerson.split(",");
             let selectQuery = `SELECT * from namedPerson WHERE fname = $1 AND lname = $2`;
             let selectParams = [person[1], person[0]];
@@ -277,7 +282,7 @@ class Database{
             }
             if (person.length === 3){
                 if (person[2][0] === "1"){
-                    //this means it's a year
+                    //This checks if the third is a year.
                     let insertQuery = `INSERT INTO namedperson 
                                             (fname, lname, lifeyears)     
                                         VALUES ($1, $2, $3) RETURNING namedperonid`;
@@ -286,7 +291,7 @@ class Database{
                     return resInsert[0].namedpersonid; 
                 }
                 else{
-                    //with nobility
+                    //If not a year, then it's a nobility title.
                     let insertQuery = `INSERT INTO namedperson 
                                             (fname, lname, nobilitytitle)     
                                         VALUES ($1, $2, $3) RETURNING namedperonid`;
@@ -296,7 +301,7 @@ class Database{
                 }
             }   
             else if (person.length === 4){
-                //nobility + year
+                //Checks for nobility title and year.
                 let insertQuery = `INSERT INTO namedperson
                                     (fname, lname, nobilitytitle, lifeyears) 
                                 VALUES 
@@ -306,7 +311,7 @@ class Database{
                 return resInsert[0].namedpersonid;
             }
             else{
-                //no nobility 
+                //There's no nobility title or year, meaning only name and last name.
                 let insertQuery = `INSERT INTO namedperson(fname, lname) VALUES ($1, $2) RETURNING namedpersonid`;
                 let resInsert = await this.execute(insertQuery, selectParams);
                 return resInsert[0].namedpersonid;
@@ -317,8 +322,14 @@ class Database{
         }
     };
 
+    /**
+     * @description insertIfPublisherExist, this function searches for the publisher, 
+     * if the publisher exists then returns it's id. Otherwise it inserts it into the
+     * database and returns the id.
+     * @param {String(Location:name)} publisher 
+     * @returns publisher's id.
+     */
     insertIfPublisherExist = async (publisher) => {
-        //publishername, publisherlocation
         try{
             //Check for existing
             publisher = publisher.split(":");
@@ -329,6 +340,7 @@ class Database{
                 return res[0].publisherid;
             }
             else {
+                //Doesn't exist, proceed with inserting.
                 let insertQuery = `INSERT INTO publisher(publisherlocation, publishername)  VALUES ($1, $2) RETURNING publisherid`;
                 let res = await this.execute(insertQuery, selectParams);
                 return res[0].publisherid;
@@ -339,6 +351,13 @@ class Database{
         }
     };
 
+    /**
+     * @description insertIntoDatabase is a function that parses every property of the book, 
+     * inserts it and gets all the required id's that are used as foreign keys for bookedition.
+     * then proceeds to insert it to bookedition and all other tables.
+     * @param {JSON file} filename 
+     * @returns None.
+     */
     insertIntoDatabase = async (filename) => {
         let rawBooksFile = fs.readFileSync(`data/output/${filename}`);
         let books = JSON.parse(rawBooksFile);
@@ -365,15 +384,15 @@ class Database{
             let titleRes = await this.execute(titleQuery, [title]);
             let titleid = titleRes[0].titleid;
             let publisherid = 1
-            if (books[index].publisher !== ""){
+            if (books[index].publisher !== ""){ //Inserts into publisher
                 publisherid = await this.insertIfPublisherExist(books[index].publisher);
             }
-            for (let i = 0; i < authorsList; i++){
+            for (let i = 0; i < authorsList; i++){ //Inserts into the author and the bookid.
                 let namedPersonID = await this.insertIfNamedPersonExist(authorsList[0]);
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }
-            for (let i = 0; i < subject.length; i++){
+            for (let i = 0; i < subject.length; i++){ //Inserts into booksubject.
                 let sub = subject[i].trim().toLowerCase()
                 if (sub === "?" || sub === "unknown" || sub === "????"){
                     sub = "unk"
@@ -386,7 +405,9 @@ class Database{
             const booktypeParams = [bookid, type];
             await this.execute(booktypeQuery, booktypeParams);
 
-            //TODO
+            /**
+             * @TODO Fix these values depending on file.
+             */
             let editionid = 1;
             let formatid = 1;
             let agreementTypeID = 1;
@@ -404,8 +425,9 @@ class Database{
      * @description readFile, takes the input file and parses it into a json. Files 
      * should be able to be found in the data/input folder and output json files 
      * will automatically be stored in data/output/filename.json
-     * 
-     * @param filename: The name of the path we want to read.
+     * @note file must be TSV. Otherwise won't work.
+     * @param {file must be on '/data/input'} filename: The name of the path we want to read.
+     * @returns None.
      */
     readFile = (filename) => {
         try{
