@@ -127,7 +127,7 @@ class Database{
             this.execute(`CREATE TABLE namedPerson (
                 namedPersonID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                 fname VARCHAR(250) NOT NULL,
-                lname VARCHAR(250) NOT NULL,
+                lname VARCHAR(250),
                 nobilityTitle VARCHAR(250),
                 lifeYears VARCHAR(250), 
                 personNote VARCHAR(250)
@@ -276,16 +276,24 @@ class Database{
             let person = namedPerson.split(",");
             let selectQuery = `SELECT * from namedPerson WHERE fname = $1 AND lname = $2`;
             let selectParams = [person[1], person[0]];
-            let res = await this.execute(selectQuery);
+            let res = await this.execute(selectQuery, selectParams);
             if ( res.length > 0){
                 return res[0].namedpersonid
             }
-            if (person.length === 3){
+            if (person.length === 1){
+                let insertQuery = `INSERT INTO namedperson 
+                                        (fname)
+                                    VALUES ($1) RETURNING namedpersonid`;
+                let insertParam = [person[0]];
+                let resInsert = await this.execute(insertQuery, insertParam);
+                return resInsert[0].namedpersonid
+            }
+            else if (person.length === 3){
                 if (person[2][0] === "1"){
                     //This checks if the third is a year.
                     let insertQuery = `INSERT INTO namedperson 
                                             (fname, lname, lifeyears)     
-                                        VALUES ($1, $2, $3) RETURNING namedperonid`;
+                                        VALUES ($1, $2, $3) RETURNING namedpersonid`;
                     let insertParam = [person[1], person[0], person[2]];
                     let resInsert = await this.execute(insertQuery, insertParam);
                     return resInsert[0].namedpersonid; 
@@ -294,7 +302,7 @@ class Database{
                     //If not a year, then it's a nobility title.
                     let insertQuery = `INSERT INTO namedperson 
                                             (fname, lname, nobilitytitle)     
-                                        VALUES ($1, $2, $3) RETURNING namedperonid`;
+                                        VALUES ($1, $2, $3) RETURNING namedpersonid`;
                     let insertParam = [person[1], person[0], person[2]];
                     let resInsert = await this.execute(insertQuery, insertParam);
                     return resInsert[0].namedpersonid;    
@@ -308,6 +316,8 @@ class Database{
                                     ($1, $2, $3, $4) RETURNING namedpersonid`;
                 let insertParam = [person[1], person[0], person[2], person[3]];
                 let resInsert = await this.execute(insertQuery, insertParam); 
+                // console.log(person)
+                // console.log(resInsert[0].namedpersonid);
                 return resInsert[0].namedpersonid;
             }
             else{
@@ -379,7 +389,7 @@ class Database{
                 subject = books[index].subject.split(",");
             }
             let authorsList = books[index].author.split(" and ");
-            let title = books[index].title;
+            let title = books[index].title.trim();
             const titleQuery = `INSERT INTO title (titlestring) VALUES ($1) RETURNING titleid`;
             let titleRes = await this.execute(titleQuery, [title]);
             let titleid = titleRes[0].titleid;
@@ -387,13 +397,13 @@ class Database{
             if (books[index].publisher !== ""){ //Inserts into publisher
                 publisherid = await this.insertIfPublisherExist(books[index].publisher);
             }
-            for (let i = 0; i < authorsList; i++){ //Inserts into the author and the bookid.
-                let namedPersonID = await this.insertIfNamedPersonExist(authorsList[0]);
+            for (let i = 0; i < authorsList.length; i++){ //Inserts into the author and the bookid.
+                let namedPersonID = await this.insertIfNamedPersonExist(authorsList[i].trim());
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }
-            for (let i = 0; i < subject.length; i++){ //Inserts into booksubject.
-                let sub = subject[i].trim().toLowerCase()
+            for (let j = 0; j < subject.length; j++){ //Inserts into booksubject.
+                let sub = subject[j].trim().toLowerCase()
                 if (sub === "?" || sub === "unknown" || sub === "????"){
                     sub = "unk"
                 }
