@@ -273,58 +273,68 @@ class Database{
     insertIfNamedPersonExist = async (namedPerson) => {
         try{
             //Check for existing named person.
-            let person = namedPerson.split(",");
-            let selectQuery = `SELECT * from namedPerson WHERE fname = $1 AND lname = $2`;
-            let selectParams = [person[1], person[0]];
-            let res = await this.execute(selectQuery, selectParams);
-            if ( res.length > 0){
-                return res[0].namedpersonid
-            }
-            if (person.length === 1){
-                let insertQuery = `INSERT INTO namedperson 
-                                        (fname)
-                                    VALUES ($1) RETURNING namedpersonid`;
-                let insertParam = [person[0]];
-                let resInsert = await this.execute(insertQuery, insertParam);
-                return resInsert[0].namedpersonid
-            }
-            else if (person.length === 3){
-                if (person[2][0] === "1"){
-                    //This checks if the third is a year.
-                    let insertQuery = `INSERT INTO namedperson 
-                                            (fname, lname, lifeyears)     
-                                        VALUES ($1, $2, $3) RETURNING namedpersonid`;
-                    let insertParam = [person[1], person[0], person[2]];
-                    let resInsert = await this.execute(insertQuery, insertParam);
-                    return resInsert[0].namedpersonid; 
+            console.log(namedPerson.length);
+            if (namedPerson.length === 1){
+                let fname = namedPerson[0].trim();
+                let params = [fname];
+                let verification = `SELECT * FROM namedPerson WHERE fname = $1`;
+                let verificationRes = await this.execute(verification, params);
+                if (verificationRes.length > 0){
+                    return verificationRes[0].namedpersonid;
                 }
                 else{
-                    //If not a year, then it's a nobility title.
-                    let insertQuery = `INSERT INTO namedperson 
-                                            (fname, lname, nobilitytitle)     
-                                        VALUES ($1, $2, $3) RETURNING namedpersonid`;
-                    let insertParam = [person[1], person[0], person[2]];
-                    let resInsert = await this.execute(insertQuery, insertParam);
-                    return resInsert[0].namedpersonid;    
+                    let insertQuery = `INSERT INTO namedperson (fname) VALUES ($1) RETURNING namedpersonid`;
+                    let insertRes = await this.execute(insertQuery, params);
+                    return insertRes[0].namedpersonid;
                 }
-            }   
-            else if (person.length === 4){
-                //Checks for nobility title and year.
-                let insertQuery = `INSERT INTO namedperson
-                                    (fname, lname, nobilitytitle, lifeyears) 
-                                VALUES 
-                                    ($1, $2, $3, $4) RETURNING namedpersonid`;
-                let insertParam = [person[1], person[0], person[2], person[3]];
-                let resInsert = await this.execute(insertQuery, insertParam); 
-                // console.log(person)
-                // console.log(resInsert[0].namedpersonid);
-                return resInsert[0].namedpersonid;
             }
-            else{
-                //There's no nobility title or year, meaning only name and last name.
-                let insertQuery = `INSERT INTO namedperson(fname, lname) VALUES ($1, $2) RETURNING namedpersonid`;
-                let resInsert = await this.execute(insertQuery, selectParams);
-                return resInsert[0].namedpersonid;
+            else if (namedPerson.length === 2){
+                let fname = namedPerson[1].trim();
+                let lname = namedPerson[0].trim();
+                let params = [fname, lname];
+                let verification = `SELECT * FROM namedPerson WHERE fname = $1 AND lname = $2`;
+                let verificationRes = await this.execute(verification, params);
+                if (verificationRes.length > 0){
+                    return verificationRes[0].namedpersonid;
+                }
+                else{
+                    let insertQuery = `INSERT INTO namedperson (fname, lname) VALUES ($1 ,$2) RETURNING namedpersonid`;
+                    let insertRes = await this.execute(insertQuery, params);
+                    return insertRes[0].namedpersonid;
+                }
+            }
+            else if (namedPerson.length === 3){
+                let fname = namedPerson[1].trim();
+                let lname = namedPerson[0].trim();
+                let nobilityTitle = namedPerson[2].trim();
+                let params = [fname, lname, nobilityTitle];
+                let verification = `SELECT * FROM namedPerson WHERE fname = $1 AND lname = $2 AND nobilitytitle = $3`;
+                let verificationRes = await this.execute(verification, params);
+                if (verificationRes.length > 0){
+                    return verificationRes[0].namedpersonid;
+                }
+                else{
+                    let insertQuery = `INSERT INTO namedperson (fname, lname, nobilitytitle) VALUES ($1, $2, $3) RETURNING namedpersonid`;
+                    let insertRes = await this.execute(insertQuery, params);
+                    return insertRes[0].namedpersonid;
+                }
+            }
+            else if (namedPerson.length === 4){
+                let fname = namedPerson[1].trim();
+                let lname = namedPerson[0].trim();
+                let nobilityTitle = namedPerson[2].trim();
+                let yearsLived = namedPerson[3].trim();
+                let params = [fname, lname, nobilityTitle, yearsLived];
+                let verification = `SELECT * FROM namedPerson WHERE fname = $1 AND lname = $2 AND nobilitytitle = $3 AND lifeyears = $4`;
+                let verificationRes = await this.execute(verification, params);
+                if (verificationRes.length > 0){
+                    return verificationRes[0].namedpersonid;
+                }
+                else{
+                    let insertQuery = `INSERT INTO namedperson (fname, lname, nobilitytitle, lifeyears) VALUES ($1, $2, $3, $4) RETURNING namedpersonid`;
+                    let insertRes = await this.execute(insertQuery, params);
+                    return insertRes[0].namedpersonid;
+                }
             }
         }
         catch(err){
@@ -398,7 +408,8 @@ class Database{
                 publisherid = await this.insertIfPublisherExist(books[index].publisher);
             }
             for (let i = 0; i < authorsList.length; i++){ //Inserts into the author and the bookid.
-                let namedPersonID = await this.insertIfNamedPersonExist(authorsList[i].trim());
+                let namedPersonID = await this.insertIfNamedPersonExist(authorsList[i].split(','));
+                console.log(`INSERTING [${namedPersonID}, ${bookid}]`);
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }

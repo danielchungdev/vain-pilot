@@ -34,6 +34,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(cors());
 
 const db = require('./config/DBConnection');
+const e = require('express');
 
 /**
  * @swagger 
@@ -97,6 +98,17 @@ app.get('/types', (req, res) => {
     });
 });
 
+/**
+ * @swagger 
+ * /namedpersons:
+ *  get:
+ *      description: "This route gets all the named persons from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the namedpersons.
+ *          '404':
+ *              description: No types found.
+ */
 app.get('/namedpersons', (req, res) => {
     db.pool.query(`SELECT * FROM namedperson`)
     .then( data => {
@@ -109,6 +121,107 @@ app.get('/namedpersons', (req, res) => {
         }
     })
 });
+
+/**
+ * @swagger 
+ * /publisher:
+ *  get:
+ *      description: "This route gets all the publishers from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the publishers.
+ *          '404':
+ *              description: No publishers found.
+ */
+app.get('/publishers', (req, res) => {
+    db.pool.query(`SELECT * FROM publisher`)
+    .then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result);
+        }
+        else{
+            res.status(404).send('{message: "No publishers found"}');
+        }
+    })
+});
+
+/**
+ * @swagger 
+ * /types:
+ *  get:
+ *      description: "This route gets all the types from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the types.
+ *          '404':
+ *              description: No types found.
+ */
+app.get('/types', (req, res) => {
+    db.pool.query(`SELECT * FROM type`)
+    .then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result);
+        }
+        else{
+            res.status(404).send('{message: "No types found"}');
+        }
+    })
+});
+
+/**
+ * @swagger 
+ * /subjects:
+ *  get:
+ *      description: "This route gets all the subjects from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the subjects.
+ *          '404':
+ *              description: No subjects found.
+ */
+app.get('/subjects', (req, res) => {
+    db.pool.query(`SELECT * FROM subject`)
+    .then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result);
+        }
+        else{
+            res.status(404).send('{message: "No subjects found"}');
+        }
+    })
+});
+
+app.get('/books', (req, res) => {
+    db.pool.query(`SELECT * FROM bookedition`)
+    .then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result);
+        }
+        else{
+            res.status(404).send('{message: "No subjects found"}');
+        }
+    });
+});
+
+app.get('/title/:bookid', (req, res) => {
+    let bookid = parseInt(req.params.bookid);
+    db.pool.query(`SELECT * FROM title WHERE titleid = ${bookid}`)
+    .then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result[0]);
+        }
+        else{
+            res.status(404).send('{message: "No subjects found"}');
+        }
+    });
+});
+
+
 
 app.listen(port, () => {
     console.log(`Vain Backend is running on ${port}`);
