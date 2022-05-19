@@ -9,13 +9,25 @@
       |_|   |_|  |__/     
  */
 
+/**
+ * @description System imports
+ */
 require('dotenv').config();
+
+/**
+ * @description Express imports & Constants.
+ */
 const express = require('express');
+const app = express();
 const cors = require('cors');
+const port = process.env.PORT || 5000;
+app.use(cors());
+
+/**
+ * @description SwaggerUI documentation imports and options.
+ */
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const port = process.env.PORT || 5000;
-const app = express();
 const swaggerOptions = {
     swaggerDefinition: {
         info: {
@@ -31,10 +43,16 @@ const swaggerOptions = {
 }
 const swaggerDocs = swaggerJsDoc(swaggerOptions)
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.use(cors());
 
-const db = require('./config/DBConnection');
-const e = require('express');
+/**
+ * @description Importing routes
+ */
+const subjects = require('./routes/Subjects');
+const types = require('./routes/Types');
+const namedpersons = require('./routes/NamedPersons');
+const publishers = require('./routes/Publishers');
+const books = require('./routes/Books');
+const titles = require('./routes/Titles');
 
 /**
  * @swagger 
@@ -45,9 +63,8 @@ const e = require('express');
  *          '200':
  *              description: Successfully running backend
  */
-
 app.get('/', (req, res) => {
-    res.status(200).send('Hello world!');
+    res.status(200).send('Documentation found in ~/api-docs/');
 });
 
 /**
@@ -61,18 +78,28 @@ app.get('/', (req, res) => {
  *          '404':
  *              description: No subjects found.
  */
-app.get('/subjects', (req, res) => {
-    db.pool.query(`SELECT * FROM subject`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No subjects found."}');
-        }
-    });
-});
+app.get('/subjects', subjects.getAllSubjects);
+/**
+ * @swagger 
+ * /subjects/{subjectid}:
+ *  get:
+ *      parameters: 
+ *          - in: path
+ *            name: subjectid
+ *            required: true
+ *            schema: 
+ *              type: string
+ *            description: The subject's id.
+ *      description: "Gets a subject by id."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the subject.
+ *          '404':
+ *              description: No subjects found.
+ */
+app.get('/subjects/:subjectid', subjects.getSubjectById);
+
+// app.post('/subjects', subjects.addSubject)
 
 /**
  * @swagger 
@@ -85,18 +112,27 @@ app.get('/subjects', (req, res) => {
  *          '404':
  *              description: No types found.
  */
-app.get('/types', (req, res) => {
-    db.pool.query(`SELECT * FROM type`)
-    .then( data => {
-        let result = data.rows;
-        if(result.length > 0){
-            res.status(200).send(result)
-        }
-        else{
-            res.status(404).send('{message: "No types found."}')
-        }
-    });
-});
+app.get('/types', types.getAllTypes);
+
+/**
+ * @swagger 
+ * /types/{typeid}:
+ *  get:
+ *      parameters: 
+ *          - in: path
+ *            name: typeid
+ *            required: true
+ *            schema: 
+ *              type: string
+ *            description: The type's id.
+ *      description: "Gets a type by id."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the type.
+ *          '404':
+ *              description: No books types.
+ */
+app.get('/types/:typeid', types.getTypeById);
 
 /**
  * @swagger 
@@ -107,24 +143,15 @@ app.get('/types', (req, res) => {
  *          '200':
  *              description: Successfully found and return the namedpersons.
  *          '404':
- *              description: No types found.
+ *              description: No namedpersons found.
  */
-app.get('/namedpersons', (req, res) => {
-    db.pool.query(`SELECT * FROM namedperson`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No namedpersons saw"}')
-        }
-    })
-});
+app.get('/namedpersons', namedpersons.getAllNamedPersons);
+
+app.get('/namedpersons/:namedpersonid', namedpersons.getAllNamedPersonsById);
 
 /**
  * @swagger 
- * /publisher:
+ * /publishers:
  *  get:
  *      description: "This route gets all the publishers from the database."
  *      responses:
@@ -133,95 +160,86 @@ app.get('/namedpersons', (req, res) => {
  *          '404':
  *              description: No publishers found.
  */
-app.get('/publishers', (req, res) => {
-    db.pool.query(`SELECT * FROM publisher`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No publishers found"}');
-        }
-    })
-});
+app.get('/publishers', publishers.getAllPublishers);
 
 /**
  * @swagger 
- * /types:
+ * /publishers/{publishersid}:
  *  get:
- *      description: "This route gets all the types from the database."
+ *      parameters: 
+ *          - in: path
+ *            name: publishersid
+ *            required: true
+ *            schema: 
+ *              type: integer
+ *            description: The publisher's id.
+ *      description: "Gets a publisher by id."
  *      responses:
  *          '200':
- *              description: Successfully found and return the types.
+ *              description: Successfully found and return the publisher.
  *          '404':
- *              description: No types found.
+ *              description: No books found.
  */
-app.get('/types', (req, res) => {
-    db.pool.query(`SELECT * FROM type`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No types found"}');
-        }
-    })
-});
+app.get('/publishers/:publisherid', publishers.getPublisherById);
 
 /**
  * @swagger 
- * /subjects:
+ * /books:
  *  get:
- *      description: "This route gets all the subjects from the database."
+ *      description: "This route gets all the books from the database."
  *      responses:
  *          '200':
- *              description: Successfully found and return the subjects.
+ *              description: Successfully found and return the books.
  *          '404':
- *              description: No subjects found.
+ *              description: No books found.
  */
-app.get('/subjects', (req, res) => {
-    db.pool.query(`SELECT * FROM subject`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No subjects found"}');
-        }
-    })
-});
+app.get('/books', books.getAllBooks);
 
-app.get('/books', (req, res) => {
-    db.pool.query(`SELECT * FROM bookedition`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result);
-        }
-        else{
-            res.status(404).send('{message: "No subjects found"}');
-        }
-    });
-});
+/**
+ * @swagger 
+ * /books/descriptive:
+ *  get:
+ *      description: "This route gets all the books with descriptions from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the books.
+ *          '404':
+ *              description: No books found.
+ */
+app.get('/books/descriptive', books.getAllBooksDescriptive);
 
-app.get('/title/:bookid', (req, res) => {
-    let bookid = parseInt(req.params.bookid);
-    db.pool.query(`SELECT * FROM title WHERE titleid = ${bookid}`)
-    .then( data => {
-        let result = data.rows;
-        if (result.length > 0){
-            res.status(200).send(result[0]);
-        }
-        else{
-            res.status(404).send('{message: "No subjects found"}');
-        }
-    });
-});
+/**
+ * @swagger 
+ * /titles:
+ *  get:
+ *      description: "This route gets all the titles from the database."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the titles.
+ *          '404':
+ *              description: No titles found.
+ */
+app.get('/titles', titles.getAllTitles);
 
-
+/**
+ * @swagger 
+ * /title/{bookid}:
+ *  get:
+ *      parameters: 
+ *          - in: path
+ *            name: bookid
+ *            required: true
+ *            schema: 
+ *              type: integer
+ *            description: The book's id.
+ *      description: "Gets the book by id."
+ *      responses:
+ *          '200':
+ *              description: Successfully found and return the book.
+ *          '404':
+ *              description: No books found.
+ */
+app.get('/titles/:bookid', titles.getTitleById);
 
 app.listen(port, () => {
     console.log(`Vain Backend is running on ${port}`);
