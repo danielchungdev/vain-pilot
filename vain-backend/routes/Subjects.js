@@ -17,7 +17,7 @@ const getAllSubjects = router.get('/subjects', (req, res) => {
 
 const getSubjectById = router.get('/subjects/:subjectid', (req, res) => {
     let subjectid = req.params.subjectid.toLowerCase();
-    db.pool.query(`SELECT * FROM type WHERE typeid = '${subjectid}'`)
+    db.pool.query(`SELECT * FROM type WHERE subjectid = '${subjectid}'`)
     .then( data => {
         let result = data.rows;
         if(result.length > 0){
@@ -29,4 +29,8 @@ const getSubjectById = router.get('/subjects/:subjectid', (req, res) => {
     });
 });
 
-module.exports = { getAllSubjects, getSubjectById };
+const addSubject = router.post('/subjects', (req, res) => {
+    
+});
+
+module.exports = { getAllSubjects, getSubjectById, addSubject };

@@ -99,7 +99,7 @@ app.get('/subjects', subjects.getAllSubjects);
  */
 app.get('/subjects/:subjectid', subjects.getSubjectById);
 
-// app.post('/subjects', subjects.addSubject)
+app.post('/subjects', subjects.addSubject);
 
 /**
  * @swagger 
