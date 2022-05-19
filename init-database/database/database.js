@@ -273,7 +273,6 @@ class Database{
     insertIfNamedPersonExist = async (namedPerson) => {
         try{
             //Check for existing named person.
-            console.log(namedPerson.length);
             if (namedPerson.length === 1){
                 let fname = namedPerson[0].trim();
                 let params = [fname];
@@ -409,7 +408,6 @@ class Database{
             }
             for (let i = 0; i < authorsList.length; i++){ //Inserts into the author and the bookid.
                 let namedPersonID = await this.insertIfNamedPersonExist(authorsList[i].split(','));
-                console.log(`INSERTING [${namedPersonID}, ${bookid}]`);
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }
