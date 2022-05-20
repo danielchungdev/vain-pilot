@@ -21,7 +21,10 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
+const bodyParser = require('body-parser'); 
+// app.use(express.urlencoded({extended: false}))
 app.use(cors());
+app.use(bodyParser.json()); 
 
 /**
  * @description SwaggerUI documentation imports and options.
@@ -79,6 +82,7 @@ app.get('/', (req, res) => {
  *              description: No subjects found.
  */
 app.get('/subjects', subjects.getAllSubjects);
+
 /**
  * @swagger 
  * /subjects/{subjectid}:
@@ -99,7 +103,20 @@ app.get('/subjects', subjects.getAllSubjects);
  */
 app.get('/subjects/:subjectid', subjects.getSubjectById);
 
+/**
+ * @TODO write swagger documentation
+ */
 app.post('/subjects', subjects.addSubject);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.delete('/subjects/:subjectid', subjects.deleteSubject);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.put('/subjects', subjects.updateSubject);
 
 /**
  * @swagger 
