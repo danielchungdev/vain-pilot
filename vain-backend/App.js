@@ -56,7 +56,7 @@ const namedpersons = require('./routes/NamedPersons');
 const publishers = require('./routes/Publishers');
 const books = require('./routes/Books');
 const titles = require('./routes/Titles');
-const login = require('./routes/Login');
+const users = require('./routes/Users');
 
 /**
  * @swagger 
@@ -259,7 +259,7 @@ app.get('/titles', titles.getAllTitles);
  */
 app.get('/titles/:bookid', titles.getTitleById);
 
-app.post('/register', login.register);
+app.post('/register', users.register);
 
 app.listen(port, () => {
     console.log(`Vain Backend is running on ${port}`);
