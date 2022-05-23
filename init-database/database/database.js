@@ -99,6 +99,7 @@ class Database{
             this.execute(`DROP TABLE IF EXISTS publisher CASCADE`),
             this.execute(`DROP TABLE IF EXISTS agreement CASCADE`),
             this.execute(`DROP TABLE IF EXISTS bookEdition CASCADE`),
+            this.execute(`DROP TABLE IF EXISTS users CASCADE`),
         ]);
     };
 
@@ -216,6 +217,14 @@ class Database{
                 copiesRemaining INT,
                 profitLoss INT,
                 proceedsAuthor VARCHAR(250)
+            )`),
+            this.execute(`CREATE TABLE users (
+                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                fname VARCHAR(50),
+                lname VARCHAR(50),
+                username VARCHAR(50) UNIQUE,
+                password VARCHAR(50),
+                email VARCHAR(50) UNIQUE
             )`),
         ]);
     };

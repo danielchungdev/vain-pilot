@@ -10,10 +10,7 @@ import Home from './views/Home';
 import Testing from './views/Testing'
 import EditBookForm from './views/EditBookForm';
 
-
 const app = createApp(App)
-
-
 
 app.component('AddBookForm', AddBookForm)
 app.component('Reports', Reports)
