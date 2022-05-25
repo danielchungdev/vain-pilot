@@ -220,11 +220,11 @@ class Database{
             )`),
             this.execute(`CREATE TABLE users (
                 id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                fname VARCHAR(50),
-                lname VARCHAR(50),
-                username VARCHAR(50) UNIQUE,
-                password VARCHAR(50),
-                email VARCHAR(50) UNIQUE
+                fname VARCHAR(250),
+                lname VARCHAR(250),
+                username VARCHAR(250) UNIQUE,
+                password VARCHAR(250),
+                email VARCHAR(250) UNIQUE
             )`),
         ]);
     };
