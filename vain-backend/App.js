@@ -259,7 +259,15 @@ app.get('/titles', titles.getAllTitles);
  */
 app.get('/titles/:bookid', titles.getTitleById);
 
+/**
+ * @TODO Add SwaggerUI documentation
+ */
 app.post('/register', users.register);
+
+/**
+ * @TODO Add SwaggerUI documentation
+ */
+app.post('/login', users.login);
 
 app.listen(port, () => {
     console.log(`Vain Backend is running on ${port}`);

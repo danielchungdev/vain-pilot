@@ -63,9 +63,9 @@ export default function Login() {
             })
             .then( data => {
                 if (data){
-                    localStorage.setItem('user', data[0].user_id)
-                    localStorage.setItem('fname', data[0].fname)
-                    localStorage.setItem('lname', data[0].lname)
+                    localStorage.setItem('user', data.id)
+                    localStorage.setItem('fname', data.fname)
+                    localStorage.setItem('lname', data.lname)
                     navigate('/')
                 }
                 else{

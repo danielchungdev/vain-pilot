@@ -95,7 +95,7 @@ export default function Home() {
     }, [loading])  
 
     const getBooks = () => {
-        fetch("http://localhost:5000/books", {
+        fetch("http://localhost:5000/books/descriptive", {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -220,10 +220,10 @@ export default function Home() {
                         {
                             types.map((type) => (
                                 <MenuItem
-                                    key={type.type}
-                                    value={type.type}
+                                    key={type.typeid}
+                                    value={type.typedescription}
                                 >
-                                    {type.type}
+                                    {type.typedescription}
                                 </MenuItem>
                             ))
                         }
@@ -249,10 +249,10 @@ export default function Home() {
                         {
                             subject.map((subject) => (
                                 <MenuItem
-                                    key={subject.subject}
-                                    value={subject.subject}
+                                    key={subject.subjectid}
+                                    value={subject.subjectdescription}
                                 >
-                                    {subject.subject}
+                                    {subject.subjectdescription}
                                 </MenuItem>
                             ))
                         }
@@ -311,7 +311,6 @@ export default function Home() {
 
         </Container>
     )
-
     return (
         <div>
             <Navbar/>

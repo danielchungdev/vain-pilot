@@ -1,17 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/DBConnection');
-const crypto = require('crypto'); 
 
-const register = router.post('/register', (req, res) => {
+const register = router.post('/register', async (req, res) => {
     let { fname, lname, username, password, email } = req.body;
-
-    //This hashes
-    let salt = crypto.randomBytes(16).toString('hex');
-    let hash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`); 
     db.pool.query(`INSERT INTO 
                     users(fname, lname, username, password, email) 
-                    VALUES ('${fname}', '${lname}', '${username}', '${hash}', '${email}')`)
+                    VALUES ('${fname}', '${lname}', '${username}', '${password}', '${email}')`)
     .then( data => {
         let result = data.rowCount;
         res.status(200).send({message: `inserted ${result} column.`});
@@ -22,6 +17,23 @@ const register = router.post('/register', (req, res) => {
     })
 });
 
-const 
+const login = router.post('/login', async (req, res) => {
+    let { username, password } = req.body;
+    db.pool.query(`SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`)
+    .then( data => {
+        let resultsAmount = data.rowCount;
+        if (resultsAmount > 0){
+            let user = data.rows[0];
+            res.status(200).send({
+                id: `${user.id}`,
+                fname: `${user.fname}`,
+                lname: `${user.lname}`
+            });
+        }
+        else{
+            res.status(404).send({message: `No users found.`});
+        }
+    })
+});
 
-module.exports = { register }
+module.exports = { register, login }

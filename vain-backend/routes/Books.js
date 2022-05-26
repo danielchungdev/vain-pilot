@@ -21,7 +21,7 @@ const getAllBooks = router.get('/books', (req, res) => {
  */
 const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
     db.pool.query(`SELECT 
-                    titleString as title, bookid as id, publishername, publisherlocation
+                    bookid as id, titleString as title, publishername, publisherlocation
                     FROM bookedition
                     LEFT JOIN title ON bookedition.titleid = title.titleid
                     LEFT JOIN publisher ON bookedition.publisherid = publisher.publisherid`)
