@@ -153,6 +153,21 @@ app.get('/types', types.getAllTypes);
 app.get('/types/:typeid', types.getTypeById);
 
 /**
+ * @TODO write swagger documentation
+ */
+app.post('/types', types.addType);
+
+/**
+ * @TODO write swagger documentation
+ */
+add.delete('/types/:typeid', types.deleteType);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.put('/types', types.updateType);
+
+/**
  * @swagger 
  * /namedpersons:
  *  get:
