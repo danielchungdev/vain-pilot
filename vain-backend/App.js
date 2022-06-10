@@ -160,7 +160,7 @@ app.post('/types', types.addType);
 /**
  * @TODO write swagger documentation
  */
-add.delete('/types/:typeid', types.deleteType);
+app.delete('/types/:typeid', types.deleteType);
 
 /**
  * @TODO write swagger documentation

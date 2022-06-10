@@ -1,3 +1,7 @@
+/**
+ * @TODO add documentation
+ */
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/DBConnection');
@@ -29,8 +33,10 @@ const getTypeById = router.get('/types/:typeid', (req, res) => {
     });
 });
 
-const addSubject = router.post('/subjects', (req, res) => {
+const addType = router.post('/types', (req, res) => {
     let { typeid, typedescription } = req.body;
+    console.log(typeid)
+    console.log(typedescription)
     if (typeid !== undefined && typedescription !== undefined){
         let params = [typeid, typedescription];
         let query = `INSERT INTO type (typeid, typedescription) VALUES ($1, $2)`;
@@ -49,11 +55,24 @@ const addSubject = router.post('/subjects', (req, res) => {
 });
 
 const deleteType = router.delete('/types/:typeid', (req, res) => {
-
+    let typeid = req.params.typeid.toLowerCase();
+    db.pool.query(`DELETE FROM type WHERE typeid = '${typeid}'`)
+    .then( data => {
+        let result = data.rowCount;
+        res.status(200).send({message: `Deleted ${result} column.`});
+    });
 });
 
 const updateType = router.put('/types', (req, res) => {
-
+    let {typeid, typedescription} = req.body;
+    db.pool.query(`UPDATE type SET typedescription = '${typedescription}' WHERE typeid = '${typeid}'`)
+    .then( data => {
+        let result = data.rowCount;
+        res.status(200).send({message: `Updated ${result} column`});
+    });
 });
 
-module.exports = { getAllTypes, getTypeById, addSubject };
+module.exports = { 
+    getAllTypes, getTypeById, addType, 
+    deleteType, updateType 
+};
