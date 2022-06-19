@@ -180,7 +180,25 @@ app.put('/types', types.updateType);
  */
 app.get('/namedpersons', namedpersons.getAllNamedPersons);
 
+/**
+ * @TODO write swagger documentation
+ */
 app.get('/namedpersons/:namedpersonid', namedpersons.getAllNamedPersonsById);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.post('/namedpersons', namedpersons.addNamedPerson);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.delete('/namedpersons/:namedpersonid', namedpersons.deleteNamedPerson);
+
+/**
+ * @TODO write swagger documentation
+ */
+app.put('/namedpersons/:namedpersonid', namedpersons.updateNamedPerson);
 
 /**
  * @swagger 

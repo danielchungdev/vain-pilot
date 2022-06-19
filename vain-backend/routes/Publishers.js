@@ -29,4 +29,9 @@ const getPublisherById = router.get('/publishers/:publisherid', (req, res) => {
     });
 });
 
+const addPublisher = router.post('/publishers', (req, res) => {
+    let {publishername, publisherlocation, publishertype} = req.body;
+    if ()
+});
+
 module.exports = { getAllPublishers, getPublisherById };
