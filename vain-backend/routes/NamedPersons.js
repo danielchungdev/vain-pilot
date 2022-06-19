@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/DBConnection');
-const createQuery = require('../utils/utilities.js');
+const utilities = require('../utils/utilities.js');
 
 const getAllNamedPersons = router.get('/namedpersons', (req, res) => {
     db.pool.query(`SELECT * FROM namedperson`)
@@ -58,9 +58,10 @@ const deleteNamedPerson = router.delete('/namedpersons/:namedpersonid', (req, re
 });
 
 const updateNamedPerson = router.put('/namedpersons/:namedpersonid', (req, res) => {
-    let neededObject = createQuery("namedperson", req.body)
-    console.log(neededObject);
-    db.pool.query(neededObject.query, neededObject.values)
+    let namedpersonid = req.params.namedpersonid; //This is a number
+    let neededObject = utilities.createQuery("namedperson", req.body)
+    console.log(neededObject.query + ` WHERE namedpersonid = ${namedpersonid}`);
+    db.pool.query(neededObject.query + ` WHERE namedpersonid = ${namedpersonid}`, neededObject.values)
     .then( data => {
         let result = data.rowCount;
         res.status(200).send({message: `Updated ${result} column`});

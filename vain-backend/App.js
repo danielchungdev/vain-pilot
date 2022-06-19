@@ -233,6 +233,12 @@ app.get('/publishers', publishers.getAllPublishers);
  */
 app.get('/publishers/:publisherid', publishers.getPublisherById);
 
+app.post('/publishers', publishers.addPublisher);
+
+app.delete('/publishers/:publisherid', publishers.deletePublisher);
+
+app.put('/publishers/:publisherid', publishers.updatePublisher);
+
 /**
  * @swagger 
  * /books:
