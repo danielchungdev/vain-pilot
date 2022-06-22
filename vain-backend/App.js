@@ -298,6 +298,12 @@ app.get('/titles', titles.getAllTitles);
  */
 app.get('/titles/:bookid', titles.getTitleById);
 
+app.post('/titles', titles.addTitle);
+
+app.delete('/titles/:titleid', titles.deleteTitle);
+
+app.put('/titles/:titleid', titles.updateTitle);
+
 /**
  * @TODO Add SwaggerUI documentation
  */
