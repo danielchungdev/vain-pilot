@@ -245,12 +245,12 @@ class Database{
          * @TODO change these (232-239), these are default values for tables.
          */
         const tempParam = ["temporary"];
-        const tempPublisher = "INSERT INTO publisher(publishername) VALUES ($1)"
+        const tempPublisher = "INSERT INTO publisher(publishername) VALUES ($1)";
         const publisherParam = ["No publisher"];
-        await this.execute(tempPublisher, publisherParam)
+        await this.execute(tempPublisher, publisherParam);
         const tempFormat = "INSERT INTO format(formatname) VALUES ($1)";
         await this.execute(tempFormat, tempParam);
-        const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)"
+        const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)";
         await this.execute(tempAgreement, tempParam);
 
         for (let index in editions){ //Reads through all objects from the edition.json file
