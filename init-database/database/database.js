@@ -252,7 +252,8 @@ class Database{
         await this.execute(tempFormat, tempParam);
         const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)";
         await this.execute(tempAgreement, tempParam);
-
+        const unknownAuthor = "INSERT INTO namedperson (fname) VALUES ($1)";
+        await this.execute(unknownAuthor, ["Unknown"]);
         for (let index in editions){ //Reads through all objects from the edition.json file
             const query = "INSERT INTO edition (editionstring) VALUES ($1)";
             const params = [editions[index].edition];
@@ -379,6 +380,12 @@ class Database{
         }
     };
 
+    insertIntoVolume = async (volume) => {
+        let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1)`;
+        let res = await this.execute(insertQuery, [volume])
+        return res[0].editionid;
+    };
+
     /**
      * @description insertIntoDatabase is a function that parses every property of the book, 
      * inserts it and gets all the required id's that are used as foreign keys for bookedition.
@@ -390,6 +397,12 @@ class Database{
         let rawBooksFile = fs.readFileSync(`data/output/${filename}`);
         let books = JSON.parse(rawBooksFile);
         for (let index in books){
+            let descriptor = books[index].descriptor.split(";");
+            let volume = descriptor[0];
+            let volumeid = (this.insertIntoVolume(volume));
+            let edition = descriptor[1];
+            let pages = descriptor[2];
+            let comments = descriptor.slice(3).join('');
             const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
             let bookRes = await this.execute(bookQuery, [books[index].descriptor, books[index].note]);
             let bookid = bookRes[0].bookid;
@@ -417,6 +430,9 @@ class Database{
             }
             for (let i = 0; i < authorsList.length; i++){ //Inserts into the author and the bookid.
                 let namedPersonID = await this.insertIfNamedPersonExist(authorsList[i].split(','));
+                if (namedPersonID == null){
+                    namedPersonID = 1
+                }
                 const authorQuery = "INSERT INTO author (namedPersonID, bookid) VALUES ($1, $2)";
                 await this.execute(authorQuery, [namedPersonID, bookid]);
             }
@@ -447,7 +463,7 @@ class Database{
             const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID];
             await this.execute(bookeditionQuery, bookeditionParam);
         }
-    }
+    };
 
     /**
      * @description readFile, takes the input file and parses it into a json. Files 
