@@ -206,7 +206,7 @@ class Database{
                 formatNote VARCHAR(250),
                 year VARCHAR(250),
                 yearNote VARCHAR(250),
-                numberPages INT,
+                numberPages VARCHAR(250),
                 numberVolumes VARCHAR(250),
                 agreementTypeID INT REFERENCES agreement(agreementTypeID),
                 salePrice INT,
@@ -380,9 +380,9 @@ class Database{
         }
     };
 
-    insertIntoVolume = async (volume) => {
+    insertIntoEdition = async (edition) => {
         let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1)`;
-        let res = await this.execute(insertQuery, [volume])
+        let res = await this.execute(insertQuery, [edition])
         return res[0].editionid;
     };
 
@@ -399,12 +399,12 @@ class Database{
         for (let index in books){
             let descriptor = books[index].descriptor.split(";");
             let volume = descriptor[0];
-            let volumeid = (this.insertIntoVolume(volume));
             let edition = descriptor[1];
+            let editionid = this.insertIntoEdition(edition);
             let pages = descriptor[2];
             let comments = descriptor.slice(3).join('');
             const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
-            let bookRes = await this.execute(bookQuery, [books[index].descriptor, books[index].note]);
+            let bookRes = await this.execute(bookQuery, [comments, books[index].note]);
             let bookid = bookRes[0].bookid;
             let type = "unk";
             let subject = ["unk"];
@@ -448,19 +448,17 @@ class Database{
             const booktypeQuery = "INSERT INTO booktype (bookid, typeid) VALUES ($1, $2)";
             const booktypeParams = [bookid, type];
             await this.execute(booktypeQuery, booktypeParams);
-
             /**
              * @TODO Fix these values depending on file.
              */
-            let editionid = 1;
             let formatid = 1;
             let agreementTypeID = 1;
 
             const bookeditionQuery = `INSERT INTO bookedition
-                                        (bookid, editionid, publisherid, titleid, formatid, agreementtypeid) 
+                                        (bookid, editionid, publisherid, titleid, formatid, agreementtypeid, numbervolumes, numberpages) 
                                     VALUES
-                                        ($1, $2, $3, $4, $5, $6)`;
-            const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID];
+                                        ($1, $2, $3, $4, $5, $6, $7, $8)`;
+            const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID, volume, pages];
             await this.execute(bookeditionQuery, bookeditionParam);
         }
     };
