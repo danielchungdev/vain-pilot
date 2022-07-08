@@ -381,9 +381,6 @@ class Database{
     };
 
     insertIntoEdition = async (edition) => {
-        console.log("vvvvvvvvvvv")
-        console.log(edition);
-        console.log("^^^^^^^^^^")
         let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1) RETURNING editionid`;
         let res = await this.execute(insertQuery, [edition]);
         return res[0].editionid;
@@ -465,7 +462,6 @@ class Database{
                                     VALUES
                                         ($1, $2, $3, $4, $5, $6, $7, $8)`;
             const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID, volume, pages];
-            console.log(bookeditionParam);
             await this.execute(bookeditionQuery, bookeditionParam);
         }
     };
