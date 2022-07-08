@@ -381,8 +381,9 @@ class Database{
     };
 
     insertIntoEdition = async (edition) => {
-        let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1)`;
-        let res = await this.execute(insertQuery, [edition])
+        let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1) RETURNING editionid`;
+        let res = await this.execute(insertQuery, [edition]);
+        console.log(res)
         return res[0].editionid;
     };
 
@@ -400,7 +401,11 @@ class Database{
             let descriptor = books[index].descriptor.split(";");
             let volume = descriptor[0];
             let edition = descriptor[1];
-            let editionid = this.insertIntoEdition(edition);
+            let editionid = 1
+            console.log(edition);
+            if (edition !== ' '){
+                editionid = this.insertIntoEdition(edition);
+            }
             let pages = descriptor[2];
             let comments = descriptor.slice(3).join('');
             const bookQuery = "INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid";
