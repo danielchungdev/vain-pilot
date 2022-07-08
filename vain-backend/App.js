@@ -57,6 +57,7 @@ const publishers = require('./routes/Publishers');
 const books = require('./routes/Books');
 const titles = require('./routes/Titles');
 const users = require('./routes/Users');
+const authors = require('./routes/Authors');
 
 /**
  * @swagger 
@@ -303,6 +304,8 @@ app.post('/titles', titles.addTitle);
 app.delete('/titles/:titleid', titles.deleteTitle);
 
 app.put('/titles/:titleid', titles.updateTitle);
+
+app.get('/authors/:bookid', authors.getBookAuthor);
 
 /**
  * @TODO Add SwaggerUI documentation
