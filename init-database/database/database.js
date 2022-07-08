@@ -405,7 +405,7 @@ class Database{
             let edition = descriptor[1];
             let editionid = 1
             if (edition !== ' ' && edition !== undefined){
-                editionid = this.insertIntoEdition(edition);
+                editionid = await this.insertIntoEdition(edition);
             }
             let pages = descriptor[2];
             let comments = descriptor.slice(3).join('');
@@ -465,6 +465,7 @@ class Database{
                                     VALUES
                                         ($1, $2, $3, $4, $5, $6, $7, $8)`;
             const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID, volume, pages];
+            console.log(bookeditionParam);
             await this.execute(bookeditionQuery, bookeditionParam);
         }
     };
