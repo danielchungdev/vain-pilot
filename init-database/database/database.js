@@ -381,9 +381,11 @@ class Database{
     };
 
     insertIntoEdition = async (edition) => {
+        console.log("vvvvvvvvvvv")
+        console.log(edition);
+        console.log("^^^^^^^^^^")
         let insertQuery = `INSERT INTO edition(editionstring) VALUES ($1) RETURNING editionid`;
         let res = await this.execute(insertQuery, [edition]);
-        console.log(res)
         return res[0].editionid;
     };
 
@@ -402,8 +404,7 @@ class Database{
             let volume = descriptor[0];
             let edition = descriptor[1];
             let editionid = 1
-            console.log(edition);
-            if (edition !== ' '){
+            if (edition !== ' ' && edition !== undefined){
                 editionid = this.insertIntoEdition(edition);
             }
             let pages = descriptor[2];
