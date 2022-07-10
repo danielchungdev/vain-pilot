@@ -1,74 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../components/Navbar'
 
 import { Container, Typography, Input, TextareaAutosize,
   Alert, Snackbar, FormControlLabel, Radio, RadioGroup,
-  Box, Autocomplete, TextField, Stack, Button 
+  Box, Autocomplete, TextField, Stack, Button, Stepper, Step, StepLabel,
+  Select, InputLabel, OutlinedInput, FormControl,
+  MenuItem
 } from '@mui/material'
 
-const uuid = require('uuid');
+const steps = ['Select subject', 'Select Type', 'Select'];
 
 export default function AddBook() {
-    const [title, setTitle] = useState('')
-    const [year, setYear] = useState('')
-    const [located, setLocated] = useState('')
-    const [description, setDescription] = useState('')
-    const [notes, setNotes] = useState('')
-    const [namedPersons, setNamedPersons] = useState('')
-    const [selfAuthored, setSelfAuthored] = useState('')
 
-    const [authors, setAuthors] = useState([])
-    const [publishers, setPublishers] = useState([])
+    const [activeStep, setActiveStep] = useState(0);
+    const [skipped, setSkipped] = useState(new Set());
     const [subjects, setSubjects] = useState([])
     const [types, setTypes] = useState([])
 
-    const [authorsSelected, setAuthorsSelected] = useState([])
-    const [publishersSelected, setPublishersSelected] = useState([])
-    const [subjectsSelected, setSubjectsSelected] = useState([])
-    const [typesSelected, setTypesSelected] = useState([])
+    const [bookSubject, setBookSubject] = useState("")
+    const [bookType, setBookType] = useState("")
 
-    //Error 
-    const [snackbar, setSnackbar] = useState(null)
-
-    useEffect(() => {
-        
-        fetch("http://localhost:5000/namedpersons", {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then( res => res.json())
-        .then( data => {
-            setAuthors(data)
-        })
-        .catch( err => console.log(err))
-
-        fetch("http://localhost:5000/publishers", {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then( res => res.json())
-        .then( data => {
-            setPublishers(data)
-        })
-        .catch( err => console.log(err))
-
-        fetch("http://localhost:5000/types", {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then( res => res.json())
-        .then( data => {
-            setTypes(data)
-        })
-        .catch( err => console.log(err))
-
-        fetch("http://localhost:5000/subjects", {
+    useEffect( () => {
+        fetch('http://localhost:8080/subjects', {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -78,175 +31,188 @@ export default function AddBook() {
         .then( data => {
             setSubjects(data)
         })
-        .catch( err => console.log(err))
+
+        fetch('http://localhost:8080/types', {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        .then( res => res.json())
+        .then( data => {
+            setTypes(data)
+        })
+
     }, [])
 
-    const getCurrentDate = () => {
-        let today = new Date();
-        let dd = String(today.getDate()).padStart(2, '0');
-        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        let yyyy = today.getFullYear();
-        today = `${yyyy}-${mm}-${dd}`
-        return today
+    const isStepOptional = (step) => {
+      return step === 1;
+    };
+  
+    const isStepSkipped = (step) => {
+      return skipped.has(step);
+    };
+  
+    const handleNext = () => {
+      let newSkipped = skipped;
+      if (isStepSkipped(activeStep)) {
+        newSkipped = new Set(newSkipped.values());
+        newSkipped.delete(activeStep);
+      }
+  
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setSkipped(newSkipped);
+    };
+  
+    const handleBack = () => {
+      setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+  
+    const handleSkip = () => {
+      if (!isStepOptional(activeStep)) {
+        // You probably want to guard against something like this,
+        // it should never occur unless someone's actively trying to break something.
+        throw new Error("You can't skip a step that isn't optional.");
+      }
+  
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setSkipped((prevSkipped) => {
+        const newSkipped = new Set(prevSkipped.values());
+        newSkipped.add(activeStep);
+        return newSkipped;
+      });
+    };
+    
+    const onChangeSubject = (event) => {
+        const {
+            target: {value},
+        } = event;
+        setBookSubject(value);
     }
 
-    const handleCloseSnackbar = () => {
-        setSnackbar(null);
+    const onChangeType = (event) => {
+        const {
+            target: {value},
+        } = event;
+        setBookType(value);
     }
 
-    const validateInputs = () => {
-        if (title === '' || selfAuthored === '' || located === '' || isNaN(parseInt(year))){
-            setSnackbar({ children: 'There are empty fields.', severity: 'error' });
-            return false
-        }
-        else{
-            return true
-        }
-    }
+    const handleReset = () => {
+      setActiveStep(0);
+    };
+    console.log(bookSubject)
+    console.log(bookType)
 
-    const addingBook = () => {
-        if(validateInputs()){
-            const book = {
-                title: title,
-                year: year, 
-                description: description,
-                notes: notes,
-                authorship: selfAuthored,
-                namedperson: namedPersons,
-                located: located, 
-                modifiedby: 'System',
-                lastupdated: getCurrentDate()
-            }
-            fetch('http://localhost:5000/books', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(book)
-            })
-            .then( res => res.json())
-            .then( data => {
-                let addedBookid = data.rows[0].book_id;
 
-            })
-            .catch(err => console.log(err))
-        }
-    }
+    const selectSubject = (
+        <div>
+            <Typography sx={{ mt: 2, mb: 1 }}>Select a subject</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <InputLabel id="subject-label">Subject</InputLabel>
+                <Select
+                labelId="subject-label"
+                id="subject-label"
+                input={<OutlinedInput label="Name" />}
+                value={bookSubject}
+                onChange={onChangeSubject}
+                >
+                    {subjects.map((i) => (
+                        <MenuItem
+                        key={i.subjectid}
+                            value={i.subjectid}
+                        >
+                            {i.subjectdescription}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </div>
+    )
+
+    const selectType = (
+        <div>
+            <Typography sx={{ mt: 2, mb: 1 }}>Select type</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <InputLabel id="type-label">Type</InputLabel>
+                <Select
+                labelId="type-label"
+                id="type-label"
+                input={<OutlinedInput label="Name" />}
+                value={bookType}
+                onChange={onChangeType}
+                >
+                    {types.map((i) => (
+                        <MenuItem
+                        key={i.typeid}
+                            value={i.typeid}
+                        >
+                            {i.typedescription}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+        </div>
+    )
 
     return (
         <div>
             <Navbar/>
             <Container maxWidth="sm" sx={{marginTop: '2%', marginBottom: '10vh'}}>
-                <Stack spacing={1}>
-                    <Typography align="center" variant="h4">Add Book</Typography>
-                    <Typography>Title</Typography>
-                    <Input autoComplete="false" margin="dense" placeholder="Enter the title" fullWidth onChange={(e)=>setTitle(e.target.value)}></Input>
-                    <Typography>Year</Typography>
-                    <Input autoComplete="false" margin="dense" placeholder="Enter the year" fullWidth onChange={(e)=>setYear(e.target.value)}></Input>
-                    <Typography>Located</Typography>
-                    <Input autoComplete="false" margin="dense" placeholder="Located" fullWidth onChange={(e)=>setLocated(e.target.value)}></Input>
-                    <Typography>Description</Typography>
-                    <TextareaAutosize
-                        aria-label="maximum height"
-                        style={{ width: '100%' }}
-                        onChange={(e)=>setDescription(e.target.value)}
-                    />
-                    <Typography>Notes</Typography>
-                    <TextareaAutosize
-                        aria-label="maximum height"
-                        style={{ width: '100%' }}
-                        onChange={(e)=>setNotes(e.target.value)}
-                    />
-                    <Typography>Named persons</Typography>
-                    <TextareaAutosize
-                        aria-label="maximum height"
-                        style={{ width: '100%' }}
-                        onChange={(e)=>setNamedPersons(e.target.value)}
-                    />
-                    <Typography>Self Authored?</Typography>
-                    {selfAuthored}
-                    <RadioGroup row aria-label="gender" name="row-radio-buttons-group" onChange={(e) => setSelfAuthored(e.target.value)}>
-                        <FormControlLabel value="Y" control={<Radio />} label="Yes" />
-                        <FormControlLabel value="N" control={<Radio />} label="No" />
-                        <FormControlLabel value="U" control={<Radio />} label="Unknown" />
-                    </RadioGroup>
-
-                    <Autocomplete
-                        multiple
-                        id="tags-standard"
-                        options={authors}
-                        getOptionLabel={(author) => author.name}
-                        onChange={(event, newvalue)=> {
-                            setAuthorsSelected(newvalue)
-                        }}
-                        renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Author(s)"
-                        />
-                        )}
-                    />
-                    <Autocomplete
-                        multiple
-                        id="tags-standard"
-                        key='1'
-                        options={publishers}
-                        getOptionLabel={(publisher) => publisher.publisher}
-                        onChange={(event, newvalue)=> {
-                            setPublishersSelected(newvalue)
-                        }}
-                        renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Publisher(s)"
-                        />
-                        )}
-                    />
-                    <Autocomplete
-                        multiple
-                        id="tags-standard"
-                        options={subjects}
-                        key='2'
-                        getOptionLabel={(subject) => subject.subject}
-                        onChange={(event, newvalue)=> {
-                            setSubjectsSelected(newvalue)
-                        }}
-                        renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Subject(s)"
-                        />
-                        )}
-                    />
-                    <Autocomplete
-                        multiple
-                        id="tags-standard"
-                        options={types}
-                        key='3'
-                        getOptionLabel={(type) => type.type}
-                        onChange={(event, newvalue)=> {
-                            setTypesSelected(newvalue)
-                        }}
-                        renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Type(s)"
-                        />
-                        )}
-                    />
-                    <Box sx={{display:'flex', justifyContent: 'center', marginTop: '5%'}}>
-                        <Button variant='outlined' onClick={addingBook}>Add Book</Button>
-                    </Box>
-                </Stack>
-                {!!snackbar && (
-                <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                    <Alert {...snackbar} onClose={handleCloseSnackbar} />
-                </Snackbar>
-            )}
+            <Stepper activeStep={activeStep}>
+                {steps.map((label, index) => {
+                const stepProps = {};
+                const labelProps = {};
+                if (isStepOptional(index)) {
+                    labelProps.optional = (
+                    <Typography variant="caption">Optional</Typography>
+                    );
+                }
+                if (isStepSkipped(index)) {
+                    stepProps.completed = false;
+                }
+                return (
+                    <Step key={label} {...stepProps}>
+                    <StepLabel {...labelProps}>{label}</StepLabel>
+                    </Step>
+                );
+                })}
+            </Stepper>
+            {activeStep === steps.length ? (
+                <Fragment>
+                <Typography sx={{ mt: 2, mb: 1 }}>
+                    All steps completed - you&apos;re finished
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                    <Box sx={{ flex: '1 1 auto' }} />
+                    <Button onClick={handleReset}>Reset</Button>
+                </Box>
+                </Fragment>
+            ) : (
+                <Fragment>
+                {activeStep === 0 ? selectSubject : null}
+                {activeStep === 1 ? selectType : null}
+                {activeStep === 2 ? <div>This is 2</div> : null}
+                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
+                    <Button
+                    color="inherit"
+                    disabled={activeStep === 0}
+                    onClick={handleBack}
+                    sx={{ mr: 1 }}
+                    >
+                    Back
+                    </Button>
+                    <Box sx={{ flex: '1 1 auto' }} />
+                    {isStepOptional(activeStep) && (
+                    <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+                        Skip
+                    </Button>
+                    )}
+                    <Button onClick={handleNext}>
+                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                    </Button>
+                </Box>
+                </Fragment>
+                )}
             </Container>
         </div>
     )
