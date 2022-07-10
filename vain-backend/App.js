@@ -20,7 +20,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 const bodyParser = require('body-parser'); 
 // app.use(express.urlencoded({extended: false}))
 app.use(cors());
