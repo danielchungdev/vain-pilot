@@ -5,20 +5,27 @@ import { Container, Typography, Input, TextareaAutosize,
   Alert, Snackbar, FormControlLabel, Radio, RadioGroup,
   Box, Autocomplete, TextField, Stack, Button, Stepper, Step, StepLabel,
   Select, InputLabel, OutlinedInput, FormControl,
-  MenuItem
+  MenuItem,
+  createFilterOptions
 } from '@mui/material'
 
-const steps = ['Select subject', 'Select Type', 'Select'];
+const steps = ['Select subject', 'Select Type', 'Book Details', 'Author', 'Publisher'];
 
 export default function AddBook() {
-
     const [activeStep, setActiveStep] = useState(0);
     const [skipped, setSkipped] = useState(new Set());
     const [subjects, setSubjects] = useState([])
     const [types, setTypes] = useState([])
+    const [authors, setAuthors] = useState([])
 
     const [bookSubject, setBookSubject] = useState("")
     const [bookType, setBookType] = useState("")
+    const [bookAuthor, setBookAuthor] = useState("")
+
+    const authorFilterOptions = createFilterOptions({
+        matchFrom: 'any',
+        limit: 500
+    })
 
     useEffect( () => {
         fetch('http://localhost:8080/subjects', {
@@ -43,10 +50,27 @@ export default function AddBook() {
             setTypes(data)
         })
 
+        fetch('http://localhost:8080/namedpersons', {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        .then( res => res.json())
+        .then( data => {
+            let authorList = data.map( (x) => {
+                return {
+                    id: x.namedpersonid, 
+                    label: `${x.fname} ${x.lname}`
+                }
+            })
+            setAuthors(authorList)
+        })
+
     }, [])
 
     const isStepOptional = (step) => {
-      return step === 1;
+      return null;
     };
   
     const isStepSkipped = (step) => {
@@ -97,12 +121,31 @@ export default function AddBook() {
         setBookType(value);
     }
 
+    const onChangeAuthor = (event) => {
+        const {
+            target: {value},
+        } = event;
+        setBookAuthor(value);
+    }
+
     const handleReset = () => {
       setActiveStep(0);
     };
-    console.log(bookSubject)
-    console.log(bookType)
 
+    const renderStep = (step) => {
+        switch(step){
+            case 0:
+                return selectSubject;
+            case 1:
+                return selectType;
+            case 2:
+                return bookDetails;
+            case 3:
+                return selectAuthor;
+        }
+    }
+
+    console.log(authors)
 
     const selectSubject = (
         <div>
@@ -125,6 +168,49 @@ export default function AddBook() {
                         </MenuItem>
                     ))}
                 </Select>
+            </FormControl>
+        </div>
+    )
+    
+    const selectAuthor = (
+        <div>
+            <Typography sx={{ mt: 2, mb: 1 }}>Select Author</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <Autocomplete
+                    disablePortal
+                    id="authorsSelect"
+                    options = {authors}
+                    filterOptions={authorFilterOptions}
+                    getOptionLabel={(option) => option.label}
+                    renderInput={(params) => <TextField {...params} label="Author"/>}
+                />
+            </FormControl>
+            <Typography sx={{ mt: 2, mb: 1 }}>Or insert an author if not found.</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <TextField id="outlined-basic" label="Nobility Title" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Author First Name" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Author Last Name" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Life years" variant="standard" />
+            </FormControl>
+
+        </div>
+    )
+
+    const bookDetails = (
+        <div>
+            <Typography sx={{ mt: 2, mb: 1 }}>Insert book information</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <TextField id="outlined-basic" label="Book title" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Book edition" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="# of volumes" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="# of pages" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Format" variant="standard" />
+                <TextField
+                    sx={{mt: 3}}
+                    label="Book description"
+                    multiline
+                    rows={4}
+                />
             </FormControl>
         </div>
     )
@@ -157,7 +243,7 @@ export default function AddBook() {
     return (
         <div>
             <Navbar/>
-            <Container maxWidth="sm" sx={{marginTop: '2%', marginBottom: '10vh'}}>
+            <Container maxWidth="md" sx={{marginTop: '2%', marginBottom: '10vh'}}>
             <Stepper activeStep={activeStep}>
                 {steps.map((label, index) => {
                 const stepProps = {};
@@ -189,9 +275,7 @@ export default function AddBook() {
                 </Fragment>
             ) : (
                 <Fragment>
-                {activeStep === 0 ? selectSubject : null}
-                {activeStep === 1 ? selectType : null}
-                {activeStep === 2 ? <div>This is 2</div> : null}
+                {renderStep(activeStep)}
                 <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
                     <Button
                     color="inherit"

@@ -44,7 +44,7 @@ export default function Home() {
     useEffect(() => {
         getBooks();
 
-        fetch("http://localhost:5000/types", {
+        fetch("http://localhost:8080/types", {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -62,7 +62,7 @@ export default function Home() {
         })
         .catch( err => console.log(err))
 
-        fetch("http://localhost:5000/subjects", {
+        fetch("http://localhost:8080/subjects", {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default function Home() {
         })
         .catch( err => console.log(err))
 
-        fetch("http://localhost:5000/books/year", {
+        fetch("http://localhost:8080/books/year", {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default function Home() {
     }, [loading])  
 
     const getBooks = () => {
-        fetch("http://localhost:5000/books/descriptive", {
+        fetch("http://localhost:8080/books/descriptive", {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -150,9 +150,9 @@ export default function Home() {
     //      - Make sure data is clean
     //      - Pass data to the Displaybooks and reload. (Will have to updated loading state)
     const applyFilters = () => {
-        let typeRoute = 'http://localhost:5000/books/book/type';
-        let genreRoute = 'http://localhost:5000/books/book/genre';
-        let yearRoute = 'http://localhost:5000/books/years';
+        let typeRoute = 'http://localhost:8080/books/book/type';
+        let genreRoute = 'http://localhost:8080/books/book/genre';
+        let yearRoute = 'http://localhost:8080/books/years';
         let filteredBooks = []
         let count = typeFilters.length + subjectFilters.length + yearFilters.length;
         if (count > 0) {
