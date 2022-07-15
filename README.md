@@ -9,7 +9,7 @@ A database and web interface for victorial literature.
 
 ### How to install
 1. Clone the repository with `git clone https://github.com/pikachungg/vain-pilot.git`
-2. Look into [How to install database](https://github.com/pikachungg/vain-pilot/main/README.md#how-to-install-database)
+2. Look into [How to install database](https://github.com/pikachungg/vain-pilot/blob/main/README.md#how-to-install-database)
 3. Go into the vain-pilot folder `cd vain-pilot`
 4. Run `npm start` _runs with standard **npm**_ or `npm test` _runs with **bun**_
 
