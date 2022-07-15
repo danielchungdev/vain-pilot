@@ -1,34 +1,20 @@
-# How to Install
-## Step 1. Install Load Vain DB.
-- 1.1. Go to the directory/folder named "loadVainDBfromTSV".
-- 1.2. run npm install.
-- 1.3. Change userid and password to your specific DB credentials.
-- 1.4. run the following command 'node vaininstall.js' .
+# Vain-pilot
 
-## Step 2. Get frontend & Backend Ready
+A database and web interface for victorial literature.
 
-### 2.1 Frontend - Vue
-- 2.1.1. Go to the 'vain-client' directory/folder.
-- 2.1.2. Run the following command 'npm install'.
-- 2.1.3. You're done here unless any errors appear.
+## Requirements
+1. [Node 16.6+](https://nodejs.org/en/) _recommended_
+2. [bun](https://bun.sh) _optional for faster installs_
+3. [PostgreSQL](https://www.postgresql.org) _Database_
 
-### 2.2 Frontend - React
-- 2.2.1. Go to the 'vain-client-react' directory/folder.
-- 2.2.2. Run the following command 'npm install'.
+### How to install
+1. Clone the repository with `git clone https://github.com/pikachungg/vain-pilot.git`
+2. Look into [How to install database](https://github.com/pikachungg/vain-pilot/edit/main/README.md#how-to-install-database)
+3. Go into the vain-pilot folder `cd vain-pilot`
+4. Run `npm start` _runs with standard **npm**_ or `npm test` _runs with **bun**_
 
-### 2.2 Backend
-- 2.2.1. Go to the 'vain-backend' directory.
-- 2.2.3. Run the following command 'npm install'.
-- 2.2.4. Go into the 'app' directory/folder
-- 2.2.5. Go into the 'config' directory/folder
-- 2.2.6. In the file 'db.config.js' change user and password credentails to yours (optional) 
-*(In 2.2.6 you might have to change more to make it connect to your psql)
-
-### 3. Run everything (assuming you did everything above.) 
-- 3.1. cd into Team2-Projectvain
-- 3.2. run npm start 
-- 3.3. cd into vain-client-react 
-- 3.4. run npm start 
-- localhost:8080 = Vue frontend
-- localhost:3000 = React frontend
-
+### How to install database
+1. Create a database called vain `CREATE DATABASE vain`
+2. Go into the init-database folder `cd init-database`
+3. Go into the database folder `cd database`
+4. Change the credentials under the file `config.js` to match yours.
