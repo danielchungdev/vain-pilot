@@ -1,33 +1,20 @@
 {
-  "name": "team2-projectvain",
+  "name": "vain-pilot",
   "version": "1.0.0",
-  "description": "contains the command to start both the front and backend for vain",
+  "description": "- 1.1. Go to the directory/folder named \"loadVainDBfromTSV\". - 1.2. run npm install. - 1.3. Change userid and password to your specific DB credentials. - 1.4. run the following command 'node vaininstall.js' .",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "client": "cd vain-client && npm run serve",
-    "server": "cd vain-backend && npm run serve",
-    "start": "concurrently \"npm run client\" \"npm run server\" ",
-    "generate": "json-server ./db/generate.js",
-    "unittest": "json-server ./db/books.json & vue-cli-service serve"
+    "start": "(cd init-database && npm install && npm start) && ((cd vain-backend && npm install && npm test) & (cd vain-client && npm install && npm start))" ,
+    "test": "(cd init-database && bun install && bun start) && ((cd vain-backend && bun install && bun test) & (cd vain-client && bun install && bun start))"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KingColton1/Team2-ProjectVain.git"
+    "url": "git+https://github.com/pikachungg/vain-pilot.git"
   },
-  "author": "",
+  "author": "Daniel Chung",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/KingColton1/Team2-ProjectVain/issues"
+    "url": "https://github.com/pikachungg/vain-pilot/issues"
   },
-  "homepage": "https://github.com/KingColton1/Team2-ProjectVain#readme",
-  "devDependencies": {
-    "concurrently": "^6.4.0",
-    "npm-run-all": "^4.1.5"
-  },
-  "dependencies": {
-    "faker": "^5.5.3",
-    "json-server": "^0.17.0",
-    "lodash": "^4.17.21"
-  }
+  "homepage": "https://github.com/pikachungg/vain-pilot#readme"
 }
