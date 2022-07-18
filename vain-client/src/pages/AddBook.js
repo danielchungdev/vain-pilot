@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react'
+ import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../components/Navbar'
 
 import { Container, Typography, Input, TextareaAutosize,
@@ -17,10 +17,28 @@ export default function AddBook() {
     const [subjects, setSubjects] = useState([])
     const [types, setTypes] = useState([])
     const [authors, setAuthors] = useState([])
+    const [publishers, setPublishers] = useState("")
 
     const [bookSubject, setBookSubject] = useState("")
+
     const [bookType, setBookType] = useState("")
-    const [bookAuthor, setBookAuthor] = useState("")
+
+    const [bookAuthor, setBookAuthor] = useState(null)
+    const [authNobility, setAuthNobility] = useState("")
+    const [authFname, setAuthFname] = useState("")
+    const [authLname, setAuthLname] = useState("")
+    const [authLifeyears, setAuthLifeyears] = useState("")
+
+    const [bookTitle, setBookTitle] = useState("")
+    const [bookEdition, setBookEdition ] = useState("")
+    const [bookVolumes, setBookVolumes ] = useState("")
+    const [bookPages, setBookPages ] = useState("")
+    const [bookFormat, setBookFormat ] = useState("")
+    const [bookDescription, setBookDescription ] = useState("")
+
+    const [bookPublisher, setBookPublisher] = useState("")
+    const [publishername, setPublisherName] = useState("")
+    const [publisherLocation, setPublisherLocation] = useState("")
 
     const authorFilterOptions = createFilterOptions({
         matchFrom: 'any',
@@ -67,6 +85,17 @@ export default function AddBook() {
             setAuthors(authorList)
         })
 
+        fetch('http://localhost:8080/publishers', {
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        .then( res => res.json())
+        .then( data => {
+            setPublishers(data)
+        })
+
     }, [])
 
     const isStepOptional = (step) => {
@@ -88,14 +117,19 @@ export default function AddBook() {
       setSkipped(newSkipped);
     };
   
+    const clearAuthors = () => {
+        setAuthNobility("")
+        setAuthFname("")
+        setAuthLname("")
+        setAuthLifeyears("")
+    }
+
     const handleBack = () => {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
   
     const handleSkip = () => {
       if (!isStepOptional(activeStep)) {
-        // You probably want to guard against something like this,
-        // it should never occur unless someone's actively trying to break something.
         throw new Error("You can't skip a step that isn't optional.");
       }
   
@@ -121,13 +155,6 @@ export default function AddBook() {
         setBookType(value);
     }
 
-    const onChangeAuthor = (event) => {
-        const {
-            target: {value},
-        } = event;
-        setBookAuthor(value);
-    }
-
     const handleReset = () => {
       setActiveStep(0);
     };
@@ -142,10 +169,10 @@ export default function AddBook() {
                 return bookDetails;
             case 3:
                 return selectAuthor;
+            case 4: 
+                return selectPublisher;
         }
     }
-
-    console.log(authors)
 
     const selectSubject = (
         <div>
@@ -171,7 +198,7 @@ export default function AddBook() {
             </FormControl>
         </div>
     )
-    
+                
     const selectAuthor = (
         <div>
             <Typography sx={{ mt: 2, mb: 1 }}>Select Author</Typography>
@@ -180,6 +207,11 @@ export default function AddBook() {
                     disablePortal
                     id="authorsSelect"
                     options = {authors}
+                    value={bookAuthor}
+                    onChange = {(e, author) => {
+                        clearAuthors()
+                        setBookAuthor(author)
+                    }}
                     filterOptions={authorFilterOptions}
                     getOptionLabel={(option) => option.label}
                     renderInput={(params) => <TextField {...params} label="Author"/>}
@@ -187,10 +219,10 @@ export default function AddBook() {
             </FormControl>
             <Typography sx={{ mt: 2, mb: 1 }}>Or insert an author if not found.</Typography>
             <FormControl sx={{ m: 1, width: 300 }}>
-                <TextField id="outlined-basic" label="Nobility Title" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Author First Name" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Author Last Name" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Life years" variant="standard" />
+                <TextField id="outlined-basic" label="Nobility Title" variant="standard" value={authNobility} onChange={(e)=> {setBookAuthor(null);setAuthNobility(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Author First Name" variant="standard" value={authFname} onChange={(e)=> {setBookAuthor(null);setAuthFname(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Author Last Name" variant="standard" value={authLname} onChange={(e)=> {setBookAuthor(null);authLname(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Life years" variant="standard" value={authLifeyears} onChange={(e)=> {setBookAuthor(null);setAuthLifeyears(e.target.value)}}/>
             </FormControl>
 
         </div>
@@ -236,6 +268,27 @@ export default function AddBook() {
                         </MenuItem>
                     ))}
                 </Select>
+            </FormControl>
+        </div>
+    )
+
+    const selectPublisher = (
+        <div>
+            <Typography sx={{ mt: 2, mb: 1 }}>Select a publisher</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <Autocomplete
+                    disablePortal
+                    id="authorsSelect"
+                    options = {publishers}
+                    filterOptions={authorFilterOptions}
+                    getOptionLabel={(option) => option.publishername + " " + option.publisherlocation}
+                    renderInput={(params) => <TextField {...params} label="Publisher"/>}
+                />
+            </FormControl>
+            <Typography sx={{ mt: 2, mb: 1 }}>Or insert a publisher if not found.</Typography>
+            <FormControl sx={{ m: 1, width: 300 }}>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher name" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher location" variant="standard" />
             </FormControl>
         </div>
     )
