@@ -1,4 +1,4 @@
- import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import Navbar from '../components/Navbar'
 
 import { Container, Typography, Input, TextareaAutosize,
@@ -12,6 +12,9 @@ import { Container, Typography, Input, TextareaAutosize,
 const steps = ['Select subject', 'Select Type', 'Book Details', 'Author', 'Publisher'];
 
 export default function AddBook() {
+    //Move this to .env
+    const api_host = 'http://localhost:8080'
+
     const [activeStep, setActiveStep] = useState(0);
     const [skipped, setSkipped] = useState(new Set());
     const [subjects, setSubjects] = useState([])
@@ -46,7 +49,7 @@ export default function AddBook() {
     })
 
     useEffect( () => {
-        fetch('http://localhost:8080/subjects', {
+        fetch(`${api_host}/subjects`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -57,7 +60,7 @@ export default function AddBook() {
             setSubjects(data)
         })
 
-        fetch('http://localhost:8080/types', {
+        fetch(`${api_host}/types`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -68,7 +71,7 @@ export default function AddBook() {
             setTypes(data)
         })
 
-        fetch('http://localhost:8080/namedpersons', {
+        fetch(`${api_host}/namedpersons`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -122,6 +125,11 @@ export default function AddBook() {
         setAuthFname("")
         setAuthLname("")
         setAuthLifeyears("")
+    }
+
+    const clearPublishers = () => {
+        setPublisherName("")
+        setPublisherLocation("")
     }
 
     const handleBack = () => {
@@ -232,16 +240,18 @@ export default function AddBook() {
         <div>
             <Typography sx={{ mt: 2, mb: 1 }}>Insert book information</Typography>
             <FormControl sx={{ m: 1, width: 300 }}>
-                <TextField id="outlined-basic" label="Book title" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Book edition" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="# of volumes" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="# of pages" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Format" variant="standard" />
+                <TextField id="outlined-basic" label="Book title" variant="standard" value={bookTitle} onChange={(e) => {setBookTitle(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Book edition" variant="standard" value={bookEdition} onChange={(e) => {setBookEdition(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="# of volumes" variant="standard" value={bookVolumes} onChange={(e) => {setBookVolumes(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="# of pages" variant="standard" value={bookPages} onChange={(e) => {setBookPages(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Format" variant="standard" value={bookFormat} onChange={(e) => {setBookFormat(e.target.value)}}/>
                 <TextField
                     sx={{mt: 3}}
                     label="Book description"
                     multiline
                     rows={4}
+                    value={bookDescription}
+                    onChange={(e) => {setBookDescription(e.target.value)}}
                 />
             </FormControl>
         </div>
@@ -280,6 +290,11 @@ export default function AddBook() {
                     disablePortal
                     id="authorsSelect"
                     options = {publishers}
+                    value={bookPublisher}
+                    onChange = {(e, publisher) => {
+                        clearPublishers()
+                        setBookPublisher(publisher)
+                    }}
                     filterOptions={authorFilterOptions}
                     getOptionLabel={(option) => option.publishername + " " + option.publisherlocation}
                     renderInput={(params) => <TextField {...params} label="Publisher"/>}
@@ -287,11 +302,40 @@ export default function AddBook() {
             </FormControl>
             <Typography sx={{ mt: 2, mb: 1 }}>Or insert a publisher if not found.</Typography>
             <FormControl sx={{ m: 1, width: 300 }}>
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher name" variant="standard" />
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher location" variant="standard" />
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher name" variant="standard" value={publishername} onChange={(e) => {setBookPublisher(null);setPublisherName(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Publisher location" variant="standard" value={publisherLocation} onChange={(e) => {setBookPublisher(null);setPublisherLocation(e.target.value)}}/>
             </FormControl>
         </div>
     )
+
+    const submit = () => {
+        fetch(`${api_host}/books`, {
+            method: "POST",
+            headers:{
+                "Content-Type": "application/json", 
+            },
+            body: JSON.stringify({
+                bookSubject,
+                bookType,
+                bookAuthor,
+                authNobility,
+                authFname,
+                authLname, 
+                authLifeyears,
+                bookTitle,
+                bookEdition,
+                bookVolumes,
+                bookPages,
+                bookFormat,
+                bookDescription, 
+                bookPublisher,
+                publishername,
+                publisherLocation
+            }),
+        })
+
+        handleNext()
+    }
 
     return (
         <div>
@@ -344,7 +388,7 @@ export default function AddBook() {
                         Skip
                     </Button>
                     )}
-                    <Button onClick={handleNext}>
+                    <Button onClick={activeStep === steps.length - 1 ? submit : handleNext}>
                     {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
                     </Button>
                 </Box>

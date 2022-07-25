@@ -36,4 +36,21 @@ const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
     });
 });
 
-module.exports = { getAllBooks, getAllBooksDescriptive};
+const insertBookEdition = router.post('/books', (req, res) => {
+    let { bookSubject, bookType, bookAuthor, 
+        authNobility, authFname, authLname, 
+        authLifeYears, bookTitle, bookEdition,
+        bookVolumes, bookPages, bookFormat, 
+        bookDescription, bookPublisher, publishername,
+        publisherLocation
+    } = req.body;
+    //An author was selected.
+    console.log(req.body)
+    // let authorid;
+    // if(authFname === ""){
+    //     // authorid = db.pool.query(``)
+    //     // .then()
+    // }
+});
+
+module.exports = { getAllBooks, getAllBooksDescriptive, insertBookEdition };
