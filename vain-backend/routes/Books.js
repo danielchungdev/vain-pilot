@@ -36,21 +36,61 @@ const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
     });
 });
 
-const insertBookEdition = router.post('/books', (req, res) => {
+const insertBookEdition = router.post('/books', async (req, res) => {
     let { bookSubject, bookType, bookAuthor, 
         authNobility, authFname, authLname, 
-        authLifeYears, bookTitle, bookEdition,
+        authLifeyears, bookTitle, bookEdition,
         bookVolumes, bookPages, bookFormat, 
         bookDescription, bookPublisher, publishername,
         publisherLocation
     } = req.body;
     //An author was selected.
     console.log(req.body)
-    // let authorid;
-    // if(authFname === ""){
-    //     // authorid = db.pool.query(``)
-    //     // .then()
-    // }
+    let authorid;
+    let publisherid;  
+    let titleid; 
+    if(authFname === ''){
+        authorid = bookAuthor.id;        
+    }
+    else{
+        //Should probably add if the author already exists.
+        //Should check before this and then return error.
+        let query = `INSERT INTO namedperson 
+                        (fname, lname, nobilitytitle, lifeyears)
+                    VALUES ($1, $2, $3, $4)
+                    RETURNING namedpersonid`
+        await db.pool.query(query, [authFname, authLname, authNobility, authLifeyears]) 
+        .then( data => {
+            authorid = data.rows[0].namedpersonid;
+        })
+    }
+    //Should probably add if the publisher already exists.
+    //Should check before this and then return error.
+    if(publishername === ''){
+        publisherid = bookPublisher.publisherid; 
+    }
+    else {
+        let query = `INSERT INTO publisher 
+                        (publishername, publisherlocation)
+                    VALUES ($1, $2)
+                    RETURNING publisherid
+                    ` 
+        await db.pool.query(query, [publishername, publisherLocation])
+        .then( data => {
+            publisherid = data.rows[0].publisherid;
+        })
+    }
+    //bookTitle = bookTitle.replace(/'/g, "\\'");
+    //there is an error here, it doesn't work if the book has a ' on it, might have to use 
+    //a prepared statement for this.
+    let titleQuery = `INSERT INTO title (titlestring) VALUES ($1) RETURNING titleid`; 
+    await db.pool.query(titleQuery, [bookTitle]) 
+    .then( data => {
+        titleid = data.rows[0].titleid;
+    })
+    console.log('This is the title id: ' + titleid)
+    console.log('This is an author id: ' + authorid)
+    console.log('This is a publishers id: ' + publisherid)
 });
 
 module.exports = { getAllBooks, getAllBooksDescriptive, insertBookEdition };

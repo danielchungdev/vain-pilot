@@ -229,7 +229,7 @@ export default function AddBook() {
             <FormControl sx={{ m: 1, width: 300 }}>
                 <TextField id="outlined-basic" label="Nobility Title" variant="standard" value={authNobility} onChange={(e)=> {setBookAuthor(null);setAuthNobility(e.target.value)}}/>
                 <TextField sx={{mt: 1}} id="outlined-basic" label="Author First Name" variant="standard" value={authFname} onChange={(e)=> {setBookAuthor(null);setAuthFname(e.target.value)}}/>
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Author Last Name" variant="standard" value={authLname} onChange={(e)=> {setBookAuthor(null);authLname(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Author Last Name" variant="standard" value={authLname} onChange={(e)=> {setBookAuthor(null);setAuthLname(e.target.value)}}/>
                 <TextField sx={{mt: 1}} id="outlined-basic" label="Life years" variant="standard" value={authLifeyears} onChange={(e)=> {setBookAuthor(null);setAuthLifeyears(e.target.value)}}/>
             </FormControl>
 
