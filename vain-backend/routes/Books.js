@@ -49,6 +49,7 @@ const insertBookEdition = router.post('/books', async (req, res) => {
     let authorid;
     let publisherid;  
     let titleid; 
+    let bookid;
     if(authFname === ''){
         authorid = bookAuthor.id;        
     }
@@ -80,13 +81,15 @@ const insertBookEdition = router.post('/books', async (req, res) => {
             publisherid = data.rows[0].publisherid;
         })
     }
-    //bookTitle = bookTitle.replace(/'/g, "\\'");
-    //there is an error here, it doesn't work if the book has a ' on it, might have to use 
-    //a prepared statement for this.
     let titleQuery = `INSERT INTO title (titlestring) VALUES ($1) RETURNING titleid`; 
     await db.pool.query(titleQuery, [bookTitle]) 
     .then( data => {
         titleid = data.rows[0].titleid;
+    })
+    let insertBookQuery = `INSERT INTO book (bookdescription, booknote) VALUES ($1, $2) RETURNING bookid` 
+    await db.pool.query(insertBookQuery, [bookDescription, ""])
+    .then( data => {
+        bookid = data.rows[0].bookid;
     })
     console.log('This is the title id: ' + titleid)
     console.log('This is an author id: ' + authorid)
