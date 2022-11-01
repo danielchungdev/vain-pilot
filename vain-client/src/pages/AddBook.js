@@ -39,9 +39,18 @@ export default function AddBook() {
     const [bookFormat, setBookFormat ] = useState("")
     const [bookDescription, setBookDescription ] = useState("")
 
+    const [bookSalesPrice, setBookSalesPrice] = useState("")
+    const [bookPaymentAgreedAmount, setBookPaymentAgreedAmount] = useState("")
+    const [bookIllustrations, setBookIllustrations] = useState("")
+    const [bookCopiesSold, setBookCopiesSold] = useState("")
+    const [bookCopiesRemaining, setBookCopiesRemaining] = useState("")
+    const [bookProfitLoss, setBookProfitLoss] = useState("")
+    const [bookProceedAuthor, setBookProceedAuthor] = useState("")
+
     const [bookPublisher, setBookPublisher] = useState("")
     const [publishername, setPublisherName] = useState("")
     const [publisherLocation, setPublisherLocation] = useState("")
+
 
     const authorFilterOptions = createFilterOptions({
         matchFrom: 'any',
@@ -88,7 +97,7 @@ export default function AddBook() {
             setAuthors(authorList)
         })
 
-        fetch('http://localhost:8080/publishers', {
+        fetch(`${api_host}/publishers`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -244,7 +253,10 @@ export default function AddBook() {
                 <TextField sx={{mt: 1}} id="outlined-basic" label="Book edition" variant="standard" value={bookEdition} onChange={(e) => {setBookEdition(e.target.value)}}/>
                 <TextField sx={{mt: 1}} id="outlined-basic" label="# of volumes" variant="standard" value={bookVolumes} onChange={(e) => {setBookVolumes(e.target.value)}}/>
                 <TextField sx={{mt: 1}} id="outlined-basic" label="# of pages" variant="standard" value={bookPages} onChange={(e) => {setBookPages(e.target.value)}}/>
-                <TextField sx={{mt: 1}} id="outlined-basic" label="Format" variant="standard" value={bookFormat} onChange={(e) => {setBookFormat(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Sale price" variant="standard" value={bookPages} onChange={(e) => {setBookPages(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Copies sold" variant="standard" value={bookPages} onChange={(e) => {setBookPages(e.target.value)}}/>
+                <TextField sx={{mt: 1}} id="outlined-basic" label="Copies remaining" variant="standard" value={bookPages} onChange={(e) => {setBookPages(e.target.value)}}/>
+
                 <TextField
                     sx={{mt: 3}}
                     label="Book description"
@@ -296,7 +308,7 @@ export default function AddBook() {
                         setBookPublisher(publisher)
                     }}
                     filterOptions={authorFilterOptions}
-                    getOptionLabel={(option) => option.publishername + " " + option.publisherlocation}
+                    getOptionLabel={(option) => `${option.publishername} ${option.publisherlocation}`}
                     renderInput={(params) => <TextField {...params} label="Publisher"/>}
                 />
             </FormControl>
@@ -330,7 +342,7 @@ export default function AddBook() {
                 bookDescription, 
                 bookPublisher,
                 publishername,
-                publisherLocation
+                publisherLocation,
             }),
         })
 

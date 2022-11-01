@@ -86,14 +86,20 @@ const insertBookEdition = router.post('/books', async (req, res) => {
     .then( data => {
         titleid = data.rows[0].titleid;
     })
-    let insertBookQuery = `INSERT INTO book (bookdescription, booknote) VALUES ($1, $2) RETURNING bookid` 
+    let insertBookQuery = `INSERT INTO book (bookdescriptor, booknote) VALUES ($1, $2) RETURNING bookid` 
     await db.pool.query(insertBookQuery, [bookDescription, ""])
     .then( data => {
         bookid = data.rows[0].bookid;
     })
+    let insertAuthorQuery = `INSERT INTO author (namedpersonid, bookid) VALUES ($1, $2)`
+    await db.pool.query(insertAuthorQuery, [authorid, bookid])
+    .then(console.log('inserted data.'))
+    //let bookEditionQuery = `INSERT INTO bookedition 
+    //                        (bookid, editionid, publisherid, titleid, )`   
     console.log('This is the title id: ' + titleid)
     console.log('This is an author id: ' + authorid)
     console.log('This is a publishers id: ' + publisherid)
+    console.log('This is the book id:  ' + bookid)
 });
 
 module.exports = { getAllBooks, getAllBooksDescriptive, insertBookEdition };

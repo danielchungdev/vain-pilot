@@ -209,13 +209,13 @@ class Database{
                 numberPages VARCHAR(250),
                 numberVolumes VARCHAR(250),
                 agreementTypeID INT REFERENCES agreement(agreementTypeID),
-                salePrice INT,
-                paymentAgreedAmount INT,
+                salePrice VARCHAR(250),
+                paymentAgreedAmount VARCHAR(250),
                 illustrations VARCHAR(250),
-                illustrationsPayment INT,
-                copiesSold INT,
-                copiesRemaining INT,
-                profitLoss INT,
+                illustrationsPayment VARCHAR(250),
+                copiesSold VARCHAR(250),
+                copiesRemaining VARCHAR(250),
+                profitLoss VARCHAR(250),
                 proceedsAuthor VARCHAR(250)
             )`),
             this.execute(`CREATE TABLE users (
@@ -245,15 +245,15 @@ class Database{
          * @TODO change these (232-239), these are default values for tables.
          */
         const tempParam = ["temporary"];
-        const tempPublisher = "INSERT INTO publisher(publishername) VALUES ($1)";
-        const publisherParam = ["No publisher"];
+        const tempPublisher = "INSERT INTO publisher(publishername, publisherlocation) VALUES ($1, $2)";
+        const publisherParam = ["No", "Publisher"];
         await this.execute(tempPublisher, publisherParam);
         const tempFormat = "INSERT INTO format(formatname) VALUES ($1)";
         await this.execute(tempFormat, tempParam);
         const tempAgreement = "INSERT INTO agreement(agreementtypename) VALUES ($1)";
         await this.execute(tempAgreement, tempParam);
-        const unknownAuthor = "INSERT INTO namedperson (fname) VALUES ($1)";
-        await this.execute(unknownAuthor, ["Unknown"]);
+        const unknownAuthor = "INSERT INTO namedperson (fname, lname) VALUES ($1, $2)";
+        await this.execute(unknownAuthor, ["Unknown", "Author"]);
         for (let index in editions){ //Reads through all objects from the edition.json file
             const query = "INSERT INTO edition (editionstring) VALUES ($1)";
             const params = [editions[index].edition];
