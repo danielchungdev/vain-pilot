@@ -1,10 +1,11 @@
 import Head from 'next/head'
 import Navbar from '../components/Navbar'
-
+import Footer from '../components/Footer'
 import { Listbox, Transition } from '@headlessui/react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 
 import { Fragment, useState } from 'react'
+import Categories from '../components/Categories'
 
 const people = [
   { name: 'Type'},
@@ -178,8 +179,20 @@ const Home = () => {
             </div>
           </div>
         </div>
+
+        <div className='m-auto w-2/3 text-center mb-20'>
+          <h1 className='text-3xl'>Popular Categories</h1>
+          <div className='flex flex-wrap mt-10'>
+            <Categories/>
+            <Categories/>
+            <Categories/>
+            <Categories/>
+          </div>
+        </div>
+
       </main>
 
+      <Footer/> 
 
     </div>
   )

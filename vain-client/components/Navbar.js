@@ -46,7 +46,7 @@ const Navbar = (props) => {
     )
 
     return(
-        <div class="grid-cols-12 grid p-5 gap-5">
+        <div class="grid-cols-12 grid p-5 gap-5 border-b-2">
             {loggedIn ? navbar : defaultNav}
         </div>
     )
