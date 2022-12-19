@@ -7,14 +7,14 @@ const Navbar = (props) => {
 
     const defaultNav = (
         <>
-            <h1 class="
+            <h1 className="
                 font-didot text-5xl col-span-2 col-start-1
                 2xl:col-start-2
             ">
                 VAIN
             </h1>
-            <p class="
-                grid place-items-center bg-slate-200 rounded-full col-start-7 col-span-3
+            <p className="
+                grid place-items-center bg-slate-200 rounded-full col-start-7 col-span-3 drop-shadow-lg
                 sm:col-start-8 sm:col-span-2
                 md:col-start-8 md:col-span-2
                 lg:col-start-8 lg:col-span-2
@@ -23,8 +23,8 @@ const Navbar = (props) => {
             ">
                 Login
             </p>
-            <p class="
-                grid place-items-center bg-green-900 text-slate-200 rounded-full col-start-10 col-span-3
+            <p className="
+                grid place-items-center bg-green-900 text-slate-200 rounded-full col-start-10 col-span-3 drop-shadow-lg
                 sm:col-start-10 sm:col-span-2
                 md:col-start-10 md:col-span-2
                 lg:col-start-10 lg:col-span-2
@@ -38,15 +38,15 @@ const Navbar = (props) => {
 
     const navbar = (
         <>
-            <h1 class="font-didot text-5xl col-span-2 col-start-2">VAIN</h1>
-            <i class="col-start-11 grid place-items-center text-4xl">
+            <h1 className="font-didot text-5xl col-span-2 col-start-2">VAIN</h1>
+            <i className="col-start-11 grid place-items-center text-4xl">
                 <FaUserCircle style={{color:"#14532d"}}/>
             </i>
         </>
     )
 
     return(
-        <div class="grid-cols-12 grid p-5 gap-5 border-b-2">
+        <div className="grid-cols-12 grid p-5 gap-5 border-b-2">
             {loggedIn ? navbar : defaultNav}
         </div>
     )

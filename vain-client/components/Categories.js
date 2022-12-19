@@ -1,9 +1,7 @@
 
-import temp from '../public/temp.jpg'
-
-const Categories = () => {
+const Categories = (props) => {
     return(
-        <div className="w-60 h-60 m-auto my-2 bg-slate-500 bg-temp
+        <div className="w-60 h-60 m-auto my-2 bg-temp rounded drop-shadow-lg 
         bg-cover grid grid-rows-3 place-items-center
         ">
             <div className='bg-gray-800 p-2 rounded bg-opacity-40 row-start-3'>
