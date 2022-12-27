@@ -39,7 +39,7 @@ const swaggerOptions = {
             contact: {
                 name: 'Daniel Chung'
             }
-        },
+        },  
         servers: ['https://localhost:8080']
     },
     apis: ['App.js']

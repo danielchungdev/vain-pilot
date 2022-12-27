@@ -4,8 +4,8 @@
   "description": "- 1.1. Go to the directory/folder named \"loadVainDBfromTSV\". - 1.2. run npm install. - 1.3. Change userid and password to your specific DB credentials. - 1.4. run the following command 'node vaininstall.js' .",
   "main": "index.js",
   "scripts": {
-    "start": "(cd init-database && npm install && npm start) && ((cd vain-backend && npm install && npm test) & (cd vain-client && npm install && npm start))" ,
-    "test": "(cd init-database && bun install && bun start) && ((cd vain-backend && bun install && bun test) & (cd vain-client && bun install && bun start))"
+    "start": "(cd init-database && npm install && npm start) && ((cd vain-backend && npm install && npm test) & (cd vain-client && npm install && npm run dev))",
+    "test": "(cd init-database && bun install && bun start) && ((cd vain-backend && bun install && bun test) & (cd vain-client && bun install && bun run dev))"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/pikachungg/vain-pilot/issues"
   },
-  "homepage": "https://github.com/pikachungg/vain-pilot#readme"
+  "homepage": "https://github.com/pikachungg/vain-pilot#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.4.13"
+  }
 }
