@@ -4,7 +4,7 @@ const BookCard = (props) => {
 
     return(
         <div className="p-8 flex border-b-2 border-b-slate-300 ">
-            <input className="mr-10 w-6 h-6 border-b-2 border-blue-600" type="checkbox"/>
+            <input className="mr-[40px] border-b-2 border-blue-600" type="checkbox"/>
             <div className="block">
                 <h1 className="text-l font-semibold mb-3">{props.title}</h1>
                 <div className="text-gray-500 font-normal text-sm">

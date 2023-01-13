@@ -400,6 +400,7 @@ class Database{
             let descriptor = books[index].descriptor.split(";");
             let volume = descriptor[0];
             let edition = descriptor[1];
+			let year = books[index].year;
             let editionid = 1
             if (edition !== ' ' && edition !== undefined){
                 editionid = await this.insertIntoEdition(edition);
@@ -458,10 +459,10 @@ class Database{
             let agreementTypeID = 1;
 
             const bookeditionQuery = `INSERT INTO bookedition
-                                        (bookid, editionid, publisherid, titleid, formatid, agreementtypeid, numbervolumes, numberpages) 
+                                        (bookid, editionid, publisherid, titleid, formatid, agreementtypeid, numbervolumes, year, numberpages) 
                                     VALUES
-                                        ($1, $2, $3, $4, $5, $6, $7, $8)`;
-            const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID, volume, pages];
+                                        ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+            const bookeditionParam = [bookid, editionid, publisherid, titleid, formatid, agreementTypeID, volume, year, pages];
             await this.execute(bookeditionQuery, bookeditionParam);
         }
     };

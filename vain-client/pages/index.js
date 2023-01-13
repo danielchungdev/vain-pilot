@@ -15,7 +15,7 @@ const Home = () => {
   const [subjects, setSubjects] = useState([])
   const [types, setTypes] = useState([])
 
-  const api_uri = process.env.NEXT_PUBLIC_API_LOCAL
+  const api_uri = process.env.NEXT_PUBLIC_API_LOCAL || "http://localhost:8080"
 
   useEffect( () => {
     const endpoint = `${api_uri}`
