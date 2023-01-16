@@ -268,6 +268,7 @@ app.get('/books/descriptive', books.getAllBooksDescriptive);
 
 app.post('/books', books.insertBookEdition);
 
+app.get('/books/:bookid', books.getBookById);
 /**
  * @swagger 
  * /titles:

@@ -103,4 +103,18 @@ const insertBookEdition = router.post('/books', async (req, res) => {
     console.log('This is the book id:  ' + bookid)
 });
 
-module.exports = { getAllBooks, getAllBooksDescriptive, insertBookEdition };
+const getBookById = router.get('/books/:bookid', async (req, res) => {
+	const bookid = parseInt(req.params.bookid)
+    db.pool.query(`SELECT * FROM bookedition WHERE bookid = ${bookid}`)
+	.then( data => {
+        let result = data.rows;
+        if (result.length > 0){
+            res.status(200).send(result);
+        }
+        else{
+            res.status(404).send(`{message: "No book with id: ${bookid} found"}`);
+        }
+    });
+})
+
+module.exports = { getAllBooks, getAllBooksDescriptive, insertBookEdition, getBookById };
