@@ -21,11 +21,15 @@ const getAllBooks = router.get('/books', (req, res) => {
  */
 const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
     db.pool.query(`SELECT 
-					author.bookid, namedperson.fname, namedperson.lname, namedperson.nobilitytitle, title.titlestring as title, bookedition.year
+					author.bookid, namedperson.fname, namedperson.lname, namedperson.nobilitytitle, title.titlestring as title, bookedition.year, typedescription as type, subjectdescription as subject
                     FROM author
                     LEFT JOIN bookedition ON author.bookid = bookedition.bookid
                     LEFT JOIN title on bookedition.titleid = title.titleid
-					LEFT JOIN namedperson ON author.namedpersonid = namedperson.namedpersonid`)
+					LEFT JOIN namedperson ON author.namedpersonid = namedperson.namedpersonid
+					LEFT JOIN booksubject ON booksubject.bookid = author.bookid
+					LEFT JOIN booktype ON booktype.bookid = author.bookid
+					LEFT JOIN type ON booktype.typeid = type.typeid
+					LEFT JOIN subject ON booksubject.subjectid = subject.subjectid`)
     .then( data => {
         let result = data.rows;
         if (result.length > 0){
