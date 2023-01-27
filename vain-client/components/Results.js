@@ -9,7 +9,7 @@ const Results = ({ books, total }) => {
 		}
 		return `${fname} ${lname}`
 	}
-
+	
     return(
         <>
             <div className="w-11/12 m-auto">
