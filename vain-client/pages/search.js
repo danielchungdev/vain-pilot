@@ -30,6 +30,7 @@ const search = () => {
 		for(const currFilter of filters){
 			filteredList = [...filteredList, ...books.filter( book => book.subject === currFilter || book.type === currFilter)]
 		}
+		// Fix this so you don't have to make the conversion.
 		filteredList = new Set(filteredList)
 		setFilteredBooks(Array.from(filteredList))
 	}
