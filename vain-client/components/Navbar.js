@@ -14,7 +14,7 @@ const Navbar = (props) => {
                 VAIN
             </h1>
             <p className="
-                grid place-items-center bg-slate-200 rounded-full col-start-7 col-span-3 drop-shadow-lg
+                grid place-items-center bg-slate-200 rounded-full col-start-7 col-span-3 drop-shadow-lg text-neutral-800
                 sm:col-start-8 sm:col-span-2
                 md:col-start-8 md:col-span-2
                 lg:col-start-8 lg:col-span-2
@@ -46,7 +46,7 @@ const Navbar = (props) => {
     )
 
     return(
-        <div className="grid-cols-12 grid p-5 gap-5 border-b-2">
+        <div className="grid-cols-12 grid p-5 gap-5 border-b-2 ">
             {loggedIn ? navbar : defaultNav}
         </div>
     )

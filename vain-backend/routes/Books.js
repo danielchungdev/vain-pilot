@@ -21,7 +21,7 @@ const getAllBooks = router.get('/books', (req, res) => {
  */
 const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
     db.pool.query(`SELECT 
-					author.bookid, namedperson.fname, namedperson.lname, namedperson.nobilitytitle, title.titlestring as title, bookedition.year, typedescription as type, subjectdescription as subject
+					author.bookid, namedperson.fname, namedperson.lname, namedperson.nobilitytitle, title.titlestring as title, bookedition.year, typedescription as type, subjectdescription as subject, format.formatname, saleprice, numberpages, numbervolumes, saleprice, copiessold, copiesremaining, profitloss
                     FROM author
                     LEFT JOIN bookedition ON author.bookid = bookedition.bookid
                     LEFT JOIN title on bookedition.titleid = title.titleid
@@ -29,7 +29,8 @@ const getAllBooksDescriptive = router.get('/books/descriptive', (req, res) => {
 					LEFT JOIN booksubject ON booksubject.bookid = author.bookid
 					LEFT JOIN booktype ON booktype.bookid = author.bookid
 					LEFT JOIN type ON booktype.typeid = type.typeid
-					LEFT JOIN subject ON booksubject.subjectid = subject.subjectid`)
+					LEFT JOIN subject ON booksubject.subjectid = subject.subjectid
+					LEFT JOIN format ON bookedition.formatid = format.formatid`)
     .then( data => {
         let result = data.rows;
         if (result.length > 0){
@@ -109,7 +110,24 @@ const insertBookEdition = router.post('/books', async (req, res) => {
 
 const getBookById = router.get('/books/:bookid', async (req, res) => {
 	const bookid = parseInt(req.params.bookid)
-    db.pool.query(`SELECT * FROM bookedition WHERE bookid = ${bookid}`)
+	if (bookid === NaN){
+		res.status(300).send("{message: 'Bad Request'}")
+		return
+	}
+    db.pool.query(`SELECT 
+		author.bookid, namedperson.fname, namedperson.lname, namedperson.nobilitytitle, title.titlestring as title, bookedition.year, typedescription as type, subjectdescription as subject, format.formatname, saleprice, numberpages, numbervolumes, saleprice, copiessold, copiesremaining, profitloss, book.bookdescriptor as description
+		FROM author
+		LEFT JOIN bookedition ON author.bookid = bookedition.bookid
+		LEFT JOIN title on bookedition.titleid = title.titleid
+		LEFT JOIN namedperson ON author.namedpersonid = namedperson.namedpersonid
+		LEFT JOIN booksubject ON booksubject.bookid = author.bookid
+		LEFT JOIN booktype ON booktype.bookid = author.bookid
+		LEFT JOIN type ON booktype.typeid = type.typeid
+		LEFT JOIN subject ON booksubject.subjectid = subject.subjectid
+		LEFT JOIN format ON bookedition.formatid = format.formatid
+		LEFT JOIN book ON author.bookid = book.bookid
+		WHERE author.bookid = ${bookid}
+	`)
 	.then( data => {
         let result = data.rows;
         if (result.length > 0){

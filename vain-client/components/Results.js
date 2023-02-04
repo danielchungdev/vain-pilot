@@ -13,7 +13,7 @@ const Results = ({ books, total }) => {
     return(
         <>
             <div className="w-11/12 m-auto">
-                <div className="my-5 flex font-bold text-2xl text-zinc-800 ">
+                <div className="my-5 flex font-bold text-2xl text-neutral-800">
                     {total} results
                 </div>
                 <div className="bg-white drop-shadow-md">

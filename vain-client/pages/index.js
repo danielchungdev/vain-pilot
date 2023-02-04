@@ -185,7 +185,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className='m-auto w-2/3 text-center mb-20'>
+        <div className='m-auto w-2/3 text-center mb-20 text-neutral-800'>
           <h1 className='text-5xl font-didot'>Popular Categories</h1>
           <div className='flex flex-wrap mt-10'>
             <Categories/>
@@ -198,7 +198,7 @@ const Home = () => {
       </main>
 
       <Footer/> 
-      <div className='w-4/5 m-auto my-3 font-thin'>
+      <div className='w-4/5 m-auto my-3 font-thin text-neutral-800'>
         VAIN ― © 2022 All Rights Reserved
       </div>
 
