@@ -19,5 +19,8 @@
   "homepage": "https://github.com/pikachungg/vain-pilot#readme",
   "devDependencies": {
     "autoprefixer": "^10.4.13"
+  },
+  "dependencies": {
+    "react-icons": "^4.7.1"
   }
 }
